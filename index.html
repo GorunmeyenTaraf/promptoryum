@@ -304,7 +304,7 @@ body.in-wizard footer{display:none}
     <div class="spacer"></div>
     <span class="livepill" id="livePill" hidden title="Şu an sitede olan kişi sayısı"><span class="dot"></span><b id="liveN">0</b><span class="hide-sm">çevrimiçi</span></span>
     <a class="btn yt" id="ytBtn" target="_blank" rel="noopener" data-action="sub-header">🔔 <span class="hide-sm">Abone ol</span></a>
-    <button class="btn" data-action="open-cart" aria-label="Sepeti aç">🛒 <span class="hide-sm">Sepetim</span> <span class="badge" id="cartCount">0</span></button>
+    <button class="btn" data-action="open-cart" aria-label="Seçimlerimi aç">✅ <span class="hide-sm">Seçimlerim</span> <span class="badge" id="cartCount">0</span></button>
   </div>
 </header>
 
@@ -328,7 +328,7 @@ body.in-wizard footer{display:none}
 </div>
 
 <dialog id="cartDlg" class="drawer" aria-labelledby="cartTitle">
-  <div class="dlg-head"><h2 id="cartTitle">🛒 Sepetim</h2><button class="xbtn" data-close aria-label="Kapat">✕</button></div>
+  <div class="dlg-head"><h2 id="cartTitle">✅ Seçimlerim</h2><button class="xbtn" data-close aria-label="Kapat">✕</button></div>
   <div class="dlg-body" id="cartBody"></div>
   <div class="dlg-foot" id="cartFoot"></div>
 </dialog>
@@ -1156,7 +1156,7 @@ function startHTML(d){
   const n=deptItems(d.key).length;
   return `<section>
     <div class="dhero"><span class="bem">${d.emoji}</span><h1 class="big">${esc(d.title)}</h1><p class="lead" style="margin:0">${esc(d.sub)}</p></div>
-    ${n?`<div class="resume"><span>🛒 Bu bölümden sepetinde ${n} şey var.</span><button class="btn primary" data-mode="done">Devam et →</button><button class="btn" data-action="reset-dept">Baştan başla</button></div>`:''}
+    ${n?`<div class="resume"><span>✅ Bu bölümde ${n} seçimin var.</span><button class="btn primary" data-mode="done">Devam et →</button><button class="btn" data-action="reset-dept">Baştan başla</button></div>`:''}
     <div class="choices">
       <button class="choice main" data-mode="wizard" data-step="0"><span class="em">🧭</span><span><b>Adım adım seç</b><small>${d.steps.length} basit soru. Bilmediğini atla.</small></span><span class="arr">→</span></button>
       <button class="choice" data-mode="combos"><span class="em">⚡</span><span><b>Hazır paket seç</b><small>En hızlısı. Tek dokunuşla hazır tarif.</small></span><span class="arr">→</span></button>
@@ -1170,10 +1170,10 @@ function combosHTML(d){
   return `<section>
     <button class="back" data-mode="start">← Geri</button>
     <h1 class="q">⚡ Hazır paketler</h1>
-    <p class="help" style="margin-bottom:18px">Birine dokun, hepsi sepete eklensin.</p>
+    <p class="help" style="margin-bottom:18px">Birine dokun, hepsi seçimlerine eklensin.</p>
     <div class="combos">${list.map(({c,i})=>`<button class="combo" data-combo="${i}">
       <span class="em">${c.emoji}</span><span class="nm">${esc(c.name)}</span><span class="ds">${esc(c.desc)}</span>
-      <span class="ct">+ ${c.picks.length} ayar sepete →</span></button>`).join('')}</div>
+      <span class="ct">+ ${c.picks.length} hazır seçim →</span></button>`).join('')}</div>
   </section>`;
 }
 
@@ -1222,7 +1222,7 @@ function doneHTML(d){
       <h1 class="big">${its.length?'Tarifin hazır!':'Henüz bir şey seçmedin'}</h1>
       <p class="lead" style="margin:0">${its.length?'Kontrol et, istersen bir not ekle, sonra promptunu al. Ücretsiz!':'Adım adım seç ya da hazır paket kullan.'}</p></div>
     ${its.length?`
-    <div class="card"><h3>🛒 Seçtiklerin <small>(${its.length})</small></h3>
+    <div class="card"><h3>✅ Seçtiklerin <small>(${its.length})</small></h3>
       <div class="chips">${its.map(i=>`<span class="chipx">${i.emoji} ${esc(i.label)}<button data-rm="${i.id}" aria-label="${esc(i.label)} çıkar">✕</button></span>`).join('')}</div></div>
     <div class="card note"><label for="note">📝 ${esc(d.noteLabel)}</label><small>${esc(d.noteHelp)}</small>
       <textarea id="note" rows="3" placeholder="${esc(d.notePh)}">${esc(state.notes[d.key]||'')}</textarea></div>
@@ -1242,7 +1242,7 @@ function updateHeader(){
   $('#cartCount').textContent=n;
   const showBar = n>0 && !document.body.classList.contains('in-wizard') && !(state.view!=='home' && state.mode[state.view]==='done');
   $('#cartbar').classList.toggle('show',showBar);
-  $('#cartbarInfo').textContent = `🛒 Sepetim: ${n}`;
+  $('#cartbarInfo').textContent = `✅ Seçimlerim: ${n}`;
 }
 function bump(){ const b=$('#cartCount'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
 
@@ -1271,7 +1271,7 @@ function applyCombo(i){
   const c=COMBOS[i]; if(!c) return;
   state.cart=state.cart.filter(id=>ITEMS[id].dept!==c.dept);
   c.picks.map(p=>ref(c.dept,p)).filter(Boolean).forEach(addItem);
-  save(); bump(); toast(`${c.emoji} ${c.name} sepete eklendi!`);
+  save(); bump(); toast(`${c.emoji} ${c.name} seçimlerine eklendi!`);
   go(c.dept,'done');
 }
 function randomCart(){
@@ -1320,7 +1320,7 @@ function contentsLabel(d){
 function renderCart(){
   const groups=DEPTS.filter(d=>deptItems(d.key).length), body=$('#cartBody'), foot=$('#cartFoot');
   if(!groups.length){
-    body.innerHTML=`<div class="empty"><div style="font-size:52px">🛒</div><p>Sepetin boş.<br>Yukarıdaki sekmelerden birini seç ve başla.</p></div>`;
+    body.innerHTML=`<div class="empty"><div style="font-size:52px">✅</div><p>Henüz bir şey seçmedin.<br>Yukarıdaki sekmelerden birini seç ve başla.</p></div>`;
     foot.innerHTML=`<button class="btn block lg" data-close>Seçmeye başla</button><button class="linkbtn" data-action="history">📂 Önceki promptlarım</button>`; return;
   }
   body.innerHTML = getMessages().map(x=>`<p class="note-msg ${x.t}">${esc(x.m)}</p>`).join('') +
@@ -1328,13 +1328,13 @@ function renderCart(){
       ${contentsLabel(d)}
       <div class="chips">${its.map(i=>`<span class="chipx">${i.emoji} ${esc(i.label)}<button data-rm="${i.id}" aria-label="${esc(i.label)} çıkar">✕</button></span>`).join('')}</div></div>`; }).join('');
   foot.innerHTML = `<button class="btn primary block lg" data-action="checkout">✨ Promptumu oluştur · Ücretsiz</button>
-    <div class="row"><button class="btn" data-action="share">🔗 Sepeti paylaş</button><button class="btn" data-action="clear">🗑️ Boşalt</button></div>
+    <div class="row"><button class="btn" data-action="share">🔗 Seçimlerimi paylaş</button><button class="btn" data-action="clear">🗑️ Hepsini temizle</button></div>
     <button class="linkbtn" data-action="history">📂 Önceki promptlarım</button>`;
 }
 
 /* ---------- Prompt oluşturma ---------- */
 function checkout(){
-  if(!state.cart.length){ toast('Sepetin boş 🛒 Önce bir şey seç.'); return; }
+  if(!state.cart.length){ toast('Henüz bir şey seçmedin. Önce bir bölüm seç 👆'); return; }
   if(CONFIG.youtubeUrl && !hasSub()){ openSub(); return; }
   const order={ no:Math.random().toString(36).slice(2,8).toUpperCase(), ts:Date.now(), paid: CONFIG.youtubeUrl?'🔔 Abonelik (ücretsiz)':'Ücretsiz',
     depts: DEPTS.filter(d=>deptItems(d.key).length).map(d=>({key:d.key, name:d.name, emoji:d.emoji, items:deptItems(d.key).map(i=>i.label), prompt:buildPrompt(d.key)})) };
@@ -1358,7 +1358,7 @@ function receiptText(o, idx){
     L.push(p.main, '');
     if(p.neg) L.push('--- 🚫 Olmasın listesi (negatif prompt) ---', p.neg, '');
     L.push('💡 Nasıl kullanılır?'); steps.forEach((s,i)=>L.push(`  ${i+1}) ${s}`)); L.push('');
-    L.push('🛒 Seçtiklerin: '+d.items.join(', '), '');
+    L.push('✅ Seçtiklerin: '+d.items.join(', '), '');
   });
   if(CONFIG.youtubeUrl){ let u=CONFIG.youtubeUrl; try{ u=decodeURI(u); }catch(e){} L.push(`🎬 Bu promptlarla neler yapılabildiğini izle: ${CONFIG.youtubeName} → ${u}`); }
   return L.join('\r\n');
@@ -1484,8 +1484,8 @@ async function copyText(t){
 }
 let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2600); }
 function share(){
-  const url=location.href.split('#')[0].split('?')[0]+'#sepet='+encodeURIComponent(state.cart.join(','));
-  copyText(url).then(()=>toast('🔗 Sepet linki kopyalandı. Arkadaşın açınca aynı sepeti görür.'));
+  const url=location.href.split('#')[0].split('?')[0]+'#secim='+encodeURIComponent(state.cart.join(','));
+  copyText(url).then(()=>toast('🔗 Link kopyalandı. Arkadaşın açınca aynı seçimleri görür.'));
 }
 function shareSite(){
   const url=location.href.split('#')[0].split('?')[0];
@@ -1514,7 +1514,7 @@ document.addEventListener('click',e=>{
     case 'checkout': checkout(); break;
     case 'share': share(); break;
     case 'share-site': shareSite(); break;
-    case 'clear': if(confirm('Sepeti boşaltmak istediğine emin misin?')){ state.cart=[]; save(); renderCart(); render(); } break;
+    case 'clear': if(confirm('Tüm seçimlerini temizlemek istediğine emin misin?')){ state.cart=[]; save(); renderCart(); render(); } break;
     case 'random': randomCart(); break;
     case 'reset-dept': resetDept(); break;
     case 'history': openHistory(); break;
@@ -1549,9 +1549,9 @@ document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{ i
 
 /* ---------- Başlat ---------- */
 (function loadShared(){
-  const m=location.hash.match(/sepet=([^&]+)/); if(!m) return;
+  const m=location.hash.match(/(?:secim|sepet)=([^&]+)/); if(!m) return;   // eski "sepet" linkleri de çalışır
   const ids=decodeURIComponent(m[1]).split(',').filter(id=>ITEMS[id]);
-  if(ids.length){ state.cart=ids; state.view=ITEMS[ids[0]].dept; state.mode[state.view]='done'; save(); setTimeout(()=>toast('🛒 Paylaşılan sepet yüklendi'),300); }
+  if(ids.length){ state.cart=ids; state.view=ITEMS[ids[0]].dept; state.mode[state.view]='done'; save(); setTimeout(()=>toast('✅ Paylaşılan seçimler yüklendi'),300); }
   history.replaceState(null,'',location.pathname+location.search);
 })();
 (function setupYT(){

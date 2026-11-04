@@ -324,7 +324,7 @@ body.in-wizard footer{display:none}
 
 <div class="cartbar" id="cartbar">
   <button class="info" data-action="open-cart" id="cartbarInfo"></button>
-  <button class="go" data-action="checkout">Kasaya git →</button>
+  <button class="go" data-action="checkout">✨ Promptumu al →</button>
 </div>
 
 <dialog id="cartDlg" class="drawer" aria-labelledby="cartTitle">
@@ -359,7 +359,7 @@ body.in-wizard footer{display:none}
 </dialog>
 
 <dialog id="histDlg" aria-labelledby="histTitle">
-  <div class="dlg-head"><h2 id="histTitle">🧾 Eski fişlerim</h2><button class="xbtn" data-close aria-label="Kapat">✕</button></div>
+  <div class="dlg-head"><h2 id="histTitle">📂 Önceki promptlarım</h2><button class="xbtn" data-close aria-label="Kapat">✕</button></div>
   <div class="dlg-body" id="histBody"></div>
 </dialog>
 
@@ -1220,14 +1220,14 @@ function doneHTML(d){
   return `<section>
     <div class="dhero"><span class="bem">${its.length?'🎉':'🤔'}</span>
       <h1 class="big">${its.length?'Tarifin hazır!':'Henüz bir şey seçmedin'}</h1>
-      <p class="lead" style="margin:0">${its.length?'Kontrol et, istersen bir not ekle, sonra kasaya git.':'Adım adım seç ya da hazır paket kullan.'}</p></div>
+      <p class="lead" style="margin:0">${its.length?'Kontrol et, istersen bir not ekle, sonra promptunu al. Ücretsiz!':'Adım adım seç ya da hazır paket kullan.'}</p></div>
     ${its.length?`
     <div class="card"><h3>🛒 Seçtiklerin <small>(${its.length})</small></h3>
       <div class="chips">${its.map(i=>`<span class="chipx">${i.emoji} ${esc(i.label)}<button data-rm="${i.id}" aria-label="${esc(i.label)} çıkar">✕</button></span>`).join('')}</div></div>
     <div class="card note"><label for="note">📝 ${esc(d.noteLabel)}</label><small>${esc(d.noteHelp)}</small>
       <textarea id="note" rows="3" placeholder="${esc(d.notePh)}">${esc(state.notes[d.key]||'')}</textarea></div>
     ${msgs.map(x=>`<p class="note-msg warn">${esc(x.m)}</p>`).join('')}
-    <div class="cta-wrap"><button class="btn primary xl" data-action="checkout">🧾 Kasaya git, promptumu al</button></div>
+    <div class="cta-wrap"><button class="btn primary xl" data-action="checkout">✨ Promptumu oluştur · Ücretsiz</button></div>
     <div class="card"><h3>➕ Daha fazla ayar <small>(isteğe bağlı)</small></h3>
       <div class="extras">${d.extra.map(k=>{ const a=d.A[k], n=aisleCount(d.key,k); return `<button data-extra="${k}">${a.emoji} ${esc(a.title)}${n?`<span class="n">✓${n}</span>`:''}</button>`; }).join('')}</div></div>
     <div class="row"><button class="btn" data-mode="wizard" data-step="0">✏️ Seçimleri değiştir</button><button class="btn" data-action="reset-dept">🔄 Baştan başla</button></div>
@@ -1315,24 +1315,24 @@ function contentsLabel(d){
   const words=buildPrompt(d.key).main.split(/\s+/).filter(Boolean).length;
   return `<div class="label"><div class="label-h"><b>📦 Paket içeriği · ≈${Math.max(10,Math.round(words/10)*10)} kelime</b><span class="seal">🔒 Mühürlü</span></div>
     <ul>${li.map(([t,s])=>`<li><span class="ck">✓</span><span>${t}${s}</span></li>`).join('')}</ul>
-    <div class="sealed">🔒 Prompt metni kasada açılır.</div></div>`;
+    <div class="sealed">🔒 Prompt metni "Promptumu oluştur"a basınca açılır.</div></div>`;
 }
 function renderCart(){
   const groups=DEPTS.filter(d=>deptItems(d.key).length), body=$('#cartBody'), foot=$('#cartFoot');
   if(!groups.length){
     body.innerHTML=`<div class="empty"><div style="font-size:52px">🛒</div><p>Sepetin boş.<br>Yukarıdaki sekmelerden birini seç ve başla.</p></div>`;
-    foot.innerHTML=`<button class="btn block lg" data-close>Alışverişe dön</button><button class="linkbtn" data-action="history">🧾 Eski fişlerim</button>`; return;
+    foot.innerHTML=`<button class="btn block lg" data-close>Seçmeye başla</button><button class="linkbtn" data-action="history">📂 Önceki promptlarım</button>`; return;
   }
   body.innerHTML = getMessages().map(x=>`<p class="note-msg ${x.t}">${esc(x.m)}</p>`).join('') +
     groups.map(d=>{ const its=deptItems(d.key); return `<div class="cgroup"><h3>${d.emoji} ${esc(d.name)} <span class="badge">${its.length}</span></h3>
       ${contentsLabel(d)}
       <div class="chips">${its.map(i=>`<span class="chipx">${i.emoji} ${esc(i.label)}<button data-rm="${i.id}" aria-label="${esc(i.label)} çıkar">✕</button></span>`).join('')}</div></div>`; }).join('');
-  foot.innerHTML = `<button class="btn primary block lg" data-action="checkout">🧾 Kasaya git · ücretsiz</button>
+  foot.innerHTML = `<button class="btn primary block lg" data-action="checkout">✨ Promptumu oluştur · Ücretsiz</button>
     <div class="row"><button class="btn" data-action="share">🔗 Sepeti paylaş</button><button class="btn" data-action="clear">🗑️ Boşalt</button></div>
-    <button class="linkbtn" data-action="history">🧾 Eski fişlerim</button>`;
+    <button class="linkbtn" data-action="history">📂 Önceki promptlarım</button>`;
 }
 
-/* ---------- Kasa ---------- */
+/* ---------- Prompt oluşturma ---------- */
 function checkout(){
   if(!state.cart.length){ toast('Sepetin boş 🛒 Önce bir şey seç.'); return; }
   if(CONFIG.youtubeUrl && !hasSub()){ openSub(); return; }
@@ -1340,7 +1340,7 @@ function checkout(){
     depts: DEPTS.filter(d=>deptItems(d.key).length).map(d=>({key:d.key, name:d.name, emoji:d.emoji, items:deptItems(d.key).map(i=>i.label), prompt:buildPrompt(d.key)})) };
   const h=LS.get('pm_hist',[]); h.unshift(order); LS.set('pm_hist',h.slice(0,30));
   sendEvent({type:'prompt', depts: DEPTS.filter(d=>deptItems(d.key).length).map(d=>d.key)});
-  track('prompt-alindi','Prompt alındı (kasa)');
+  track('prompt-alindi','Prompt alındı');
   DEPTS.filter(d=>deptItems(d.key).length).forEach(d=>track('prompt-'+d.key, `${d.name} promptu alındı`));
   if($('#cartDlg').open) $('#cartDlg').close();
   showReceipt(order);
@@ -1351,7 +1351,7 @@ const slug = s => String(s).toLocaleLowerCase('tr').replace(/[ğüşıöç]/g,c=
 function receiptText(o, idx){
   const ds = idx==null ? o.depts : [o.depts[idx]];
   const date=new Date(o.ts).toLocaleString('tr-TR',{dateStyle:'long',timeStyle:'short'});
-  const L=['🪐 PROMPTORYUM · Hayal et, seç, oluştur', `Fiş #${o.no} · ${date}`, ''];
+  const L=['🪐 PROMPTORYUM · Hayal et, seç, oluştur', `Prompt no: ${o.no} · ${date} · Ücretsiz`, ''];
   ds.forEach(d=>{
     const p=d.prompt, steps=TOOL_HOWTO[p.tool]||TOOL_HOWTO.general;
     L.push(`==================== ${d.emoji} ${d.name.toLocaleUpperCase('tr')} PROMPTU (${p.toolName}) ====================`, '');
@@ -1395,11 +1395,11 @@ function showReceipt(o){
   if(CONFIG.youtubeUrl) h+=`<div class="ytcta"><p>🎬 Bu promptlarla neler yapılabildiğini kanalda izle!</p>
     <a class="btn yt block" href="${esc(CONFIG.youtubeUrl)}" target="_blank" rel="noopener">▶ ${esc(CONFIG.youtubeName)} kanalına git</a>
     <button class="btn block" style="margin-top:8px" data-action="share-site">📤 Siteyi arkadaşına gönder</button></div>`;
-  h+=`<details style="margin-top:18px"><summary style="cursor:pointer;color:var(--muted)">🧾 Fişi göster</summary><div class="receipt" style="margin-top:10px">
-    <div class="r-center"><b>🪐 PROMPTORYUM</b><br>Hayal et, seç, oluştur<br>Fiş #${esc(o.no)} · ${esc(date)}</div><div class="r-sep"></div>`;
+  h+=`<details style="margin-top:18px"><summary style="cursor:pointer;color:var(--muted)">📋 Seçtiklerimi göster</summary><div class="receipt" style="margin-top:10px">
+    <div class="r-center"><b>🪐 PROMPTORYUM</b><br>Hayal et, seç, oluştur<br>Prompt no: ${esc(o.no)} · ${esc(date)}</div><div class="r-sep"></div>`;
   o.depts.forEach(d=>{ h+=`<div class="r-dept">${d.emoji} ${esc(d.name)}</div>` + d.items.map(l=>`<div class="r-line"><span>1x ${esc(l)}</span><span class="d"></span><span>✓</span></div>`).join(''); });
-  h+=`<div class="r-sep"></div><div class="r-line total"><span>TOPLAM</span><span class="d"></span><span>${total} ürün</span></div>
-    <div class="r-line"><span>ÖDEME</span><span class="d"></span><span>${esc(o.paid)}</span></div></div></details>`;
+  h+=`<div class="r-sep"></div><div class="r-line total"><span>Seçimlerin</span><span class="d"></span><span>${total} seçim</span></div>
+    <div class="r-line"><span>Ücret</span><span class="d"></span><span>Yok, tamamen ücretsiz 🎁</span></div></div></details>`;
   h+=`<p class="thanks">Teşekkürler, yine bekleriz! 🛍️</p>`;
   $('#coBody').innerHTML=h; $('#checkoutDlg').showModal(); $('#coBody').scrollTop=0;
 }
@@ -1458,8 +1458,8 @@ function subDone(){
 /* ---------- Geçmiş ---------- */
 function openHistory(){
   const h=LS.get('pm_hist',[]);
-  $('#histBody').innerHTML = h.length ? `<ul class="hist">${h.map((o,i)=>`<li><button data-hist="${i}"><b>Fiş #${esc(o.no)}</b> · ${o.depts.map(d=>d.emoji+' '+esc(d.name)).join(', ')}<br><small>${new Date(o.ts).toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'})} · ${o.depts.reduce((s,d)=>s+d.items.length,0)} ürün</small></button></li>`).join('')}</ul>`
-    : `<div class="empty"><div style="font-size:44px">🧾</div>Henüz fişin yok.</div>`;
+  $('#histBody').innerHTML = h.length ? `<ul class="hist">${h.map((o,i)=>`<li><button data-hist="${i}"><b>${o.depts.map(d=>d.emoji+' '+esc(d.name)).join(' + ')} promptu</b><br><small>${new Date(o.ts).toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'})} · ${o.depts.reduce((s,d)=>s+d.items.length,0)} seçim</small></button></li>`).join('')}</ul>`
+    : `<div class="empty"><div style="font-size:44px">📂</div>Henüz bir prompt almadın.</div>`;
   if($('#cartDlg').open) $('#cartDlg').close();
   $('#histDlg').showModal();
 }

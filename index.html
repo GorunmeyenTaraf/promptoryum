@@ -339,7 +339,8 @@ body.in-wizard footer{display:none}
    ========================================================= */
 const CONFIG = {
   youtubeUrl: "https://www.youtube.com/@G%C3%B6r%C3%BCnmeyenTaraftv", // Kanal linki (@GörünmeyenTaraftv). Boş bırakılırsa abonelik adımı atlanır
-  youtubeName: "Görünmeyen Taraf"                                       // Kanal adı
+  youtubeName: "Görünmeyen Taraf",                                      // Kanal adı
+  goatcounter: "promptoryum"                                             // GoatCounter hesap adı → panel: https://promptoryum.goatcounter.com (örn. "promptoryum"). Boşsa ziyaretçi sayacı kapalı
 };
 
 /* Sekme renkleri: c1/c2 = degrade, at = koyu zeminde okunan vurgu rengi */
@@ -1306,6 +1307,8 @@ function checkout(){
     depts: DEPTS.filter(d=>deptItems(d.key).length).map(d=>({key:d.key, name:d.name, emoji:d.emoji, items:deptItems(d.key).map(i=>i.label), prompt:buildPrompt(d.key)})) };
   const h=LS.get('pm_hist',[]); h.unshift(order); LS.set('pm_hist',h.slice(0,30));
   sendEvent({type:'prompt', depts: DEPTS.filter(d=>deptItems(d.key).length).map(d=>d.key)});
+  track('prompt-alindi','Prompt alındı (kasa)');
+  DEPTS.filter(d=>deptItems(d.key).length).forEach(d=>track('prompt-'+d.key, `${d.name} promptu alındı`));
   if($('#cartDlg').open) $('#cartDlg').close();
   showReceipt(order);
 }
@@ -1336,6 +1339,7 @@ function downloadReceipt(idx){
   a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),2000);
   toast(`📥 ${name} indirildi`);
+  track('dosya-indirildi','Prompt dosya olarak indirildi');
 }
 function showReceipt(o){
   COPY=[]; CUR=o; const add=t=>{COPY.push(t); return COPY.length-1;};
@@ -1398,6 +1402,7 @@ function subOpened(){
 function subDone(){
   subMem=true; LS.set('pm_sub',true);
   sendEvent({type:'sub'});
+  track('abone-oldum','"Abone oldum" düğmesine basıldı');
   $('#subDlg').close(); toast('🔔 Teşekkürler, aramıza hoş geldin!');
   checkout();
 }
@@ -1410,6 +1415,19 @@ function openHistory(){
   if($('#cartDlg').open) $('#cartDlg').close();
   $('#histDlg').showModal();
 }
+
+/* ---------- Ziyaretçi sayacı (GoatCounter: çerezsiz, kişisel veri yok) ---------- */
+function track(path, title){
+  try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path, title: title||path, event:true}); }catch(e){}
+}
+const seenDept = new Set();
+(function loadCounter(){
+  const n=(CONFIG.goatcounter||'').trim().toLowerCase();
+  if(!/^[a-z0-9-]+$/.test(n) || !/^https?:$/.test(location.protocol) || /^(localhost|127\.)/.test(location.hostname)) return;
+  const s=document.createElement('script');
+  s.async=true; s.src='https://gc.zgo.at/count.js'; s.setAttribute('data-goatcounter',`https://${n}.goatcounter.com/count`);
+  document.head.appendChild(s);
+})();
 
 /* ---------- Yardımcılar ---------- */
 async function copyText(t){
@@ -1435,13 +1453,13 @@ document.addEventListener('click',e=>{
   if(t.dataset.dl!=null){ downloadReceipt(t.dataset.dl==='all'?null:+t.dataset.dl); return; }
   if(t.dataset.id){ toggle(t.dataset.id); return; }
   if(t.dataset.combo!=null){ applyCombo(+t.dataset.combo); return; }
-  if(t.dataset.view){ const v=t.dataset.view; if(v==='home') go('home'); else go(v, state.mode[v]||'start'); return; }
+  if(t.dataset.view){ const v=t.dataset.view; if(v==='home') go('home'); else { if(!seenDept.has(v)){ seenDept.add(v); track('bolum-'+v, `${DEPT[v].name} bölümüne girildi`); } go(v, state.mode[v]||'start'); } return; }
   if(t.dataset.mode){ go(state.view, t.dataset.mode, t.dataset.step!=null?+t.dataset.step:null); return; }
   if(t.dataset.nav){ clearTimeout(advTimer); wizNav(t.dataset.nav==='next'?1:-1); return; }
   if(t.dataset.extra){ go(state.view,'wizard',null,t.dataset.extra); return; }
   if(t.dataset.rm){ state.cart=state.cart.filter(x=>x!==t.dataset.rm); save(); if($('#cartDlg').open) renderCart(); render(); return; }
   if(t.hasAttribute('data-close')){ t.closest('dialog').close(); return; }
-  if(t.dataset.copy!=null){ copyText(COPY[+t.dataset.copy]).then(()=>{ const o=t.textContent; t.classList.add('done'); t.textContent='✓ Kopyalandı! Şimdi yapıştır'; setTimeout(()=>{t.classList.remove('done'); t.textContent=o;},1800); }); return; }
+  if(t.dataset.copy!=null){ track('prompt-kopyalandi','Prompt kopyalandı'); copyText(COPY[+t.dataset.copy]).then(()=>{ const o=t.textContent; t.classList.add('done'); t.textContent='✓ Kopyalandı! Şimdi yapıştır'; setTimeout(()=>{t.classList.remove('done'); t.textContent=o;},1800); }); return; }
   if(t.dataset.hist!=null){ const o=LS.get('pm_hist',[])[+t.dataset.hist]; $('#histDlg').close(); if(o) showReceipt(o); return; }
   switch(t.dataset.action){
     case 'open-cart': renderCart(); $('#cartDlg').showModal(); break;
@@ -1452,7 +1470,7 @@ document.addEventListener('click',e=>{
     case 'random': randomCart(); break;
     case 'reset-dept': resetDept(); break;
     case 'history': openHistory(); break;
-    case 'sub-open': subOpened(); break;
+    case 'sub-open': subOpened(); track('youtube-acildi','Abonelik için YouTube açıldı'); break;
     case 'sub-done': subDone(); break;
     case 'sub-header': LS.set('pm_sub_clicked',true); break;
   }

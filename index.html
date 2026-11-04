@@ -1,0 +1,1499 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Promptoryum</title>
+<meta name="description" content="Promptoryum: Hayal et, seç, oluştur. Prompt yazmayı bilmek zorunda değilsin; basit soruları cevapla, yapay zekâ promptunu ücretsiz al.">
+<meta property="og:title" content="Promptoryum: Hayal et, seç, oluştur">
+<meta property="og:description" content="Yapay zekâ promptlarını süpermarket gibi seç, ücretsiz al. Video, görsel, müzik ve seslendirme için.">
+<meta property="og:image" content="avatar-512.png">
+<meta name="theme-color" content="#05061a">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ===== Uzay teması (her zaman koyu). Sekme renkleri JS ile --c1/--c2/--at olarak değişir ===== */
+:root{
+  --bg:#05061a; --surface:rgba(18,20,50,.75); --solid:#0d0f2b; --surface2:rgba(255,255,255,.05);
+  --text:#eef0ff; --muted:#a3a9d1; --line:rgba(150,160,255,.18);
+  --c1:#7c5cff; --c2:#3b82f6; --at:#a78bfa;
+  --grad:linear-gradient(135deg,var(--c1),var(--c2));
+  --soft:color-mix(in srgb,var(--c1) 22%,transparent);
+  --glow:0 0 0 1px var(--at),0 0 24px color-mix(in srgb,var(--c1) 45%,transparent);
+  --ok:#34d399; --warn:#fbbf24; --warn-soft:rgba(251,191,36,.12); --tip:#22d3ee; --tip-soft:rgba(34,211,238,.1);
+  --shadow:0 2px 6px rgba(0,0,0,.4),0 14px 40px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;background:var(--bg)}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+body{margin:0;color:var(--text);min-height:100vh;font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(ellipse 60% 45% at 10% 5%, color-mix(in srgb,var(--c1) 30%,transparent), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 92% 30%, color-mix(in srgb,var(--c2) 20%,transparent), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 55% 105%, rgba(236,72,153,.14), transparent 70%),
+    var(--bg);
+  background-attachment:fixed;transition:background .4s}
+button{font:inherit;color:inherit}
+a{color:var(--at)}
+:focus-visible{outline:3px solid var(--at);outline-offset:2px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+.hide-sm{}
+@media (max-width:640px){.hide-sm{display:none}}
+
+/* ===== Buttons ===== */
+.btn{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 16px;font-weight:700;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;white-space:nowrap;text-decoration:none;color:var(--text);transition:transform .1s,border-color .15s,filter .15s}
+.btn:hover{border-color:var(--muted)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 0 22px color-mix(in srgb,var(--c1) 40%,transparent)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.yt{background:#ff0033;border-color:transparent;color:#fff;box-shadow:0 0 20px rgba(255,0,51,.35)}
+.btn.lg{min-height:54px;font-size:17px;padding:12px 22px}
+.btn.xl{min-height:62px;font-size:19px;padding:14px 24px;width:100%}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.badge{background:var(--grad);color:#fff;border-radius:999px;font-size:12px;font-weight:800;min-width:22px;height:22px;display:inline-grid;place-items:center;padding:0 6px}
+.bump{animation:bump .4s ease}
+@keyframes bump{40%{transform:scale(1.35)}}
+
+/* ===== Header ===== */
+header.top{position:sticky;top:0;z-index:30;background:rgba(5,6,26,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.top .wrap{display:flex;align-items:center;gap:8px;height:62px}
+.logo{font-weight:800;font-size:20px;display:flex;align-items:center;gap:8px;letter-spacing:-.02em;white-space:nowrap;background:none;border:0;cursor:pointer;padding:0}
+.logo .mark{width:42px;height:42px;border-radius:50%;display:block;object-fit:cover;box-shadow:0 0 16px rgba(230,20,50,.55)}
+.avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 0 14px rgba(230,20,50,.45)}
+.hero-avatar{width:92px;height:92px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 12px;box-shadow:0 0 30px rgba(230,20,50,.5)}
+.logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.spacer{flex:1}
+
+/* ===== Sekmeler: her bölümün kendi rengi ===== */
+.tabs{position:sticky;top:62px;z-index:29;background:rgba(5,6,26,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:6px;padding-top:6px;padding-bottom:8px}
+.tab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:14px;border:1.5px solid transparent;background:transparent;cursor:pointer;font-weight:700;font-size:13px;color:var(--muted);position:relative}
+.tab .em{font-size:24px;line-height:1.1}
+.tab>span:not(.em):not(.badge){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media (max-width:640px){.tab{font-size:12px}}
+.tab:hover{background:var(--surface2)}
+.tab.active{color:#fff;background:linear-gradient(135deg,color-mix(in srgb,var(--t1) 35%,transparent),color-mix(in srgb,var(--t2) 22%,transparent));border-color:var(--t1)}
+.tab .badge{position:absolute;top:2px;right:8px;min-width:18px;height:18px;font-size:11px;background:var(--t1)}
+@media (min-width:641px){.tab{flex-direction:row;justify-content:center;gap:8px;font-size:15px;padding:10px}}
+
+/* ===== Ortak ===== */
+main{padding:22px 0 140px;min-height:60vh}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--at);margin-bottom:8px}
+h1.big{font-size:clamp(30px,6vw,52px);line-height:1.05;letter-spacing:-.03em;margin:0 0 10px;font-weight:800}
+h1.big em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--muted);font-size:clamp(16px,2.2vw,19px);margin:0 0 22px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:20px;padding:18px;margin:0 0 14px}
+.card h3{margin:0 0 12px;font-size:17px}
+.card h3 small{color:var(--muted);font-weight:500}
+.back{background:none;border:0;color:var(--muted);font-weight:700;cursor:pointer;padding:6px 0;margin-bottom:10px;font-size:15px}
+.back:hover{color:var(--text)}
+
+/* ===== Ana sayfa ===== */
+.home{text-align:center}
+.homecards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:8px 0 34px}
+@media (min-width:820px){.homecards{grid-template-columns:repeat(4,1fr)}}
+.hc{position:relative;overflow:hidden;text-align:center;border-radius:24px;border:1.5px solid color-mix(in srgb,var(--t1) 60%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--t1) 30%,transparent),color-mix(in srgb,var(--t2) 12%,transparent));padding:22px 12px 18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .15s,box-shadow .15s}
+.hc:hover{transform:translateY(-4px);box-shadow:0 0 30px color-mix(in srgb,var(--t1) 40%,transparent)}
+.hc .em{font-size:48px;line-height:1}
+.hc b{font-size:21px}
+.hc small{color:var(--muted);font-size:13.5px;line-height:1.35}
+.hc .go{margin-top:8px;font-weight:800;font-size:14px;padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,var(--t1),var(--t2));color:#fff}
+.how{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:left}
+@media (min-width:820px){.how{grid-template-columns:repeat(4,1fr)}}
+.how div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:10px;align-items:flex-start;font-weight:600;font-size:14.5px}
+.how i{font-style:normal;flex:none;width:30px;height:30px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:800;color:#fff}
+h2.sec{font-size:20px;margin:0 0 14px}
+
+/* ===== Bölüm başlangıcı ===== */
+.dhero{text-align:center;margin-bottom:22px}
+.dhero .bem{font-size:64px;line-height:1;display:block;margin-bottom:8px}
+.choices{display:grid;gap:12px;max-width:620px;margin:0 auto}
+.choice{display:flex;align-items:center;gap:16px;text-align:left;padding:18px 20px;border-radius:20px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s}
+.choice:hover{transform:translateY(-2px);border-color:var(--at);box-shadow:var(--glow)}
+.choice .em{font-size:36px;flex:none;width:56px;height:56px;border-radius:16px;background:var(--soft);display:grid;place-items:center}
+.choice b{display:block;font-size:19px}
+.choice small{color:var(--muted);font-size:14.5px}
+.choice .arr{margin-left:auto;font-size:22px;color:var(--at);flex:none}
+.choice.main{border-color:var(--at);background:linear-gradient(135deg,var(--soft),transparent)}
+.resume{max-width:620px;margin:0 auto 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 16px;border-radius:18px;background:var(--soft);border:1.5px solid var(--at)}
+.resume span{flex:1;min-width:200px;font-weight:700}
+
+/* ===== Sihirbaz (adım adım) ===== */
+.wtop{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.pill{font-size:13px;font-weight:800;padding:5px 12px;border-radius:999px;background:var(--soft);color:var(--at);white-space:nowrap}
+.bar{flex:1;height:8px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--grad);border-radius:999px;transition:width .3s}
+h1.q{font-size:clamp(24px,4.6vw,36px);line-height:1.15;margin:0 0 6px;letter-spacing:-.02em}
+.help{color:var(--muted);margin:0 0 4px;font-size:16px}
+.pickhint{font-weight:700;color:var(--at);margin:8px 0 16px;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+@media (max-width:520px){.grid{grid-template-columns:repeat(2,1fr);gap:10px}}
+.item{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;text-align:left;min-height:104px;transition:transform .12s,border-color .12s,background .12s,box-shadow .12s}
+.item:hover{transform:translateY(-2px);border-color:var(--muted)}
+.item .em{font-size:30px;line-height:1}
+.item .lb{font-weight:700;font-size:15.5px;line-height:1.25;padding-right:22px}
+.item .chk{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:14px;font-weight:800;color:transparent;transition:all .12s}
+.item.sel{border-color:var(--at);background:var(--soft);box-shadow:var(--glow)}
+.item.sel .chk{background:var(--grad);border-color:transparent;color:#fff}
+.wiznav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(5,6,26,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.wiznav .in{max-width:1000px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.wiznav .in .btn{flex:1}
+.wiznav .in .btn.back2{flex:0 0 auto}
+.wiznav .cnt{font-size:13px;color:var(--muted);font-weight:700;white-space:nowrap}
+
+/* ===== Özet ===== */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chipx{display:inline-flex;align-items:center;gap:6px;padding:7px 8px 7px 12px;border-radius:999px;background:var(--soft);border:1px solid color-mix(in srgb,var(--at) 50%,transparent);font-weight:600;font-size:14px}
+.chipx button{border:0;background:rgba(0,0,0,.3);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:12px}
+.chipx button:hover{background:rgba(255,0,51,.5)}
+.note label{display:block;font-weight:800;font-size:17px}
+.note small{display:block;color:var(--muted);margin:2px 0 10px}
+.note textarea{width:100%;border:1.5px solid var(--line);border-radius:14px;background:rgba(0,0,0,.25);color:var(--text);font:inherit;font-size:16px;padding:12px 14px;resize:vertical;min-height:80px;outline:none}
+.note textarea:focus{border-color:var(--at)}
+.extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.extras button{display:flex;align-items:center;gap:8px;padding:12px;border-radius:14px;border:1.5px dashed var(--line);background:transparent;cursor:pointer;font-weight:700;font-size:14px;text-align:left}
+.extras button:hover{border-color:var(--at)}
+.extras button .n{margin-left:auto;color:var(--at)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1}
+.note-msg{padding:12px 14px;border-radius:14px;font-size:15px;margin:0 0 10px;border-left:4px solid}
+.note-msg.warn{background:var(--warn-soft);border-color:var(--warn)}
+.note-msg.tip{background:var(--tip-soft);border-color:var(--tip)}
+.cta-wrap{margin:18px 0}
+.otherdepts{text-align:center;color:var(--muted);margin-top:20px}
+
+/* ===== Hazır paketler ===== */
+.combos{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.combo{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:20px;padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:transform .12s,border-color .12s,box-shadow .12s}
+.combo:hover{transform:translateY(-2px);box-shadow:var(--glow);border-color:var(--at)}
+.combo .em{font-size:36px}
+.combo .nm{font-weight:800;font-size:18px}
+.combo .ds{color:var(--muted);font-size:14.5px}
+.combo .ct{margin-top:auto;padding-top:6px;font-size:13px;font-weight:800;color:var(--at)}
+
+/* ===== Alt sepet çubuğu ===== */
+.cartbar{position:fixed;left:50%;bottom:16px;transform:translate(-50%,160%);z-index:40;background:var(--solid);border:1.5px solid var(--line);border-radius:999px;padding:8px 8px 8px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);max-width:calc(100% - 32px);transition:transform .3s cubic-bezier(.2,.9,.3,1.2)}
+.cartbar.show{transform:translate(-50%,0)}
+.cartbar .info{font-weight:700;font-size:15px;white-space:nowrap;background:none;border:0;cursor:pointer;padding:0}
+.cartbar .go{background:var(--grad);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:800;cursor:pointer;white-space:nowrap;font-size:15px}
+
+/* ===== Pencereler ===== */
+dialog{border:1px solid var(--line);border-radius:22px;padding:0;background:var(--solid);color:var(--text);width:min(600px,calc(100% - 32px));max-height:calc(100dvh - 32px);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(3,3,12,.6);backdrop-filter:blur(3px)}
+dialog[open]{display:flex;flex-direction:column;animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}}
+dialog.drawer{margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(440px,100%);border-radius:22px 0 0 22px}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg-head h2{margin:0;font-size:20px}
+.xbtn{border:1.5px solid var(--line);background:var(--surface);border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:16px}
+.dlg-body{padding:16px 20px;overflow:auto;flex:1}
+.dlg-foot{padding:14px 20px;border-top:1px solid var(--line);display:grid;gap:8px}
+.cgroup{margin-bottom:20px}
+.cgroup h3{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:6px}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:14px;padding:6px}
+.empty{color:var(--muted);padding:30px 0;text-align:center}
+.small-note{font-size:13.5px;color:var(--muted);text-align:center}
+
+/* Paket içeriği etiketi */
+.label{border:1.5px solid var(--line);border-radius:16px;background:linear-gradient(160deg,var(--soft),transparent);padding:14px;margin:4px 0 12px}
+.label-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.label-h b{font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+.label-h .seal{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:rgba(251,191,36,.15);color:var(--warn)}
+.label ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.label li{display:flex;gap:8px;font-size:14px}
+.label li .ck{color:var(--ok);font-weight:800}
+.label li small{color:var(--muted)}
+.sealed{margin-top:10px;padding:9px 12px;border-radius:12px;background:rgba(0,0,0,.35);border:1px dashed var(--line);font-size:13.5px;font-weight:600}
+
+/* Fiş */
+.receipt{font-family:'JetBrains Mono',monospace;background:var(--surface2);padding:18px 16px;border-radius:14px;font-size:12.5px}
+.r-center{text-align:center;line-height:1.6}
+.r-center b{font-size:15px}
+.r-sep{border-top:2px dashed var(--line);margin:12px 0}
+.r-dept{font-weight:600;margin:8px 0 4px;text-transform:uppercase}
+.r-line{display:flex;align-items:flex-end;gap:6px}
+.r-line .d{flex:1;border-bottom:1px dotted var(--muted);margin-bottom:4px;min-width:10px}
+.r-line.total{font-weight:600;font-size:13.5px}
+.out{margin-top:22px}
+.out h3{margin:0 0 8px;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.out h4{margin:12px 0 6px;font-size:14px;color:var(--muted)}
+.tool{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface2);color:var(--muted)}
+.pbox{background:rgba(0,0,0,.35);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;white-space:pre-wrap;word-break:break-word;line-height:1.55;max-height:260px;overflow:auto}
+.pbox.neg{border-style:dashed}
+.copy{margin-top:8px}
+.copy.done{background:var(--ok)!important;color:#04210f!important}
+.howuse{margin:12px 0 0;padding:12px 14px;border-radius:14px;background:var(--tip-soft);font-size:14.5px}
+.howuse ol{margin:6px 0 0;padding-left:20px}
+.thanks{text-align:center;color:var(--muted);margin:22px 0 4px}
+.ytcta{margin-top:18px;padding:16px;border-radius:16px;border:1px solid rgba(255,0,51,.35);background:rgba(255,0,51,.08);text-align:center}
+.ytcta p{margin:0 0 10px;font-weight:600}
+
+/* Abonelik */
+.subcard{display:flex;gap:12px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface2);margin-bottom:14px;text-align:left}
+.subcard .yt-ic{width:48px;height:48px;border-radius:50%;background:#ff0033;display:grid;place-items:center;color:#fff;font-size:18px;flex:none}
+.subcard b{display:block;font-size:16px}
+.subcard small{color:var(--muted)}
+.substeps{padding-left:22px;margin:12px 0 18px;display:grid;gap:6px;font-size:15px}
+.subbtns{display:grid;gap:8px}
+.hist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.hist button{width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;cursor:pointer}
+.hist small{color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,20px);opacity:0;z-index:100;background:#fff;color:#0b0c22;padding:12px 18px;border-radius:14px;font-weight:700;font-size:15px;pointer-events:none;transition:all .25s;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ===== Canlı akış ===== */
+.dot{width:9px;height:9px;border-radius:50%;background:#ff2d55;display:inline-block;box-shadow:0 0 0 0 rgba(255,45,85,.7);animation:pulse 1.6s infinite;flex:none}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(255,45,85,0)}100%{box-shadow:0 0 0 0 rgba(255,45,85,0)}}
+.livepill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.35);font-size:13px;font-weight:700;white-space:nowrap}
+.live{max-width:760px;margin:0 auto 34px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:22px;padding:18px}
+.live-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;letter-spacing:.08em;color:#ff6b88;margin-bottom:12px}
+.live-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.live-stats div{background:var(--surface2);border-radius:16px;padding:12px;text-align:center}
+.live-stats b{display:block;font-size:clamp(24px,5vw,32px);line-height:1.1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.live-stats small{color:var(--muted);font-size:12.5px;font-weight:600;line-height:1.25;display:block;margin-top:2px}
+.feed{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.feed li{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:var(--surface2);font-size:14.5px;animation:feedin .4s ease}
+@keyframes feedin{from{opacity:0;transform:translateY(-6px)}}
+.feed li .tm{margin-left:auto;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.feed .emp{color:var(--muted);justify-content:center}
+.livetoast{position:fixed;top:142px;right:16px;z-index:90;display:flex;align-items:center;gap:10px;background:var(--solid);border:1.5px solid rgba(255,45,85,.4);border-radius:16px;padding:10px 14px;font-weight:700;font-size:14px;box-shadow:var(--shadow);transform:translateX(130%);transition:transform .35s cubic-bezier(.2,.9,.3,1.2);max-width:calc(100% - 32px)}
+.livetoast.show{transform:translateX(0)}
+.socialproof{margin:10px 0 0;padding:9px 12px;border-radius:12px;background:rgba(255,45,85,.1);font-weight:700;font-size:14px;text-align:center}
+
+footer{color:var(--muted);font-size:13px;padding:30px 0 120px;text-align:center;border-top:1px solid var(--line)}
+.ytfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin:0 auto 18px;max-width:640px}
+.ytfoot .subcard{margin:0;flex:1;min-width:240px}
+body.in-wizard footer{display:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<header class="top">
+  <div class="wrap">
+    <button class="logo" data-view="home" aria-label="Ana sayfa"><img class="mark" src="avatar.webp" alt="" width="42" height="42"><span>Prompt<b>oryum</b></span></button>
+    <div class="spacer"></div>
+    <span class="livepill" id="livePill" hidden title="Şu an sitede olan kişi sayısı"><span class="dot"></span><b id="liveN">0</b><span class="hide-sm">çevrimiçi</span></span>
+    <a class="btn yt" id="ytBtn" target="_blank" rel="noopener" data-action="sub-header">🔔 <span class="hide-sm">Abone ol</span></a>
+    <button class="btn" data-action="open-cart" aria-label="Sepeti aç">🛒 <span class="hide-sm">Sepetim</span> <span class="badge" id="cartCount">0</span></button>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Bölümler"><div class="wrap" id="tabs"></div></nav>
+
+<div class="wrap"><main id="main"></main></div>
+
+<footer>
+  <div class="wrap">
+    <div class="ytfoot">
+      <div class="subcard"><img class="avatar" src="avatar.webp" alt="" width="48" height="48"><div><b id="ytName2"></b><small>Yeni prompt paketleri ve yapay zekâ videoları kanalda</small></div></div>
+      <a class="btn yt" id="ytBtn2" target="_blank" rel="noopener" data-action="sub-header">🔔 Kanala abone ol</a>
+    </div>
+    🪐 <b>Promptoryum</b> · Hayal et, seç, oluştur · Tamamen ücretsiz · Promptlar İngilizce üretilir, çünkü yapay zekâ araçları İngilizcede en iyi sonucu verir.
+  </div>
+</footer>
+
+<div class="cartbar" id="cartbar">
+  <button class="info" data-action="open-cart" id="cartbarInfo"></button>
+  <button class="go" data-action="checkout">Kasaya git →</button>
+</div>
+
+<dialog id="cartDlg" class="drawer" aria-labelledby="cartTitle">
+  <div class="dlg-head"><h2 id="cartTitle">🛒 Sepetim</h2><button class="xbtn" data-close aria-label="Kapat">✕</button></div>
+  <div class="dlg-body" id="cartBody"></div>
+  <div class="dlg-foot" id="cartFoot"></div>
+</dialog>
+
+<dialog id="checkoutDlg" aria-labelledby="coTitle">
+  <div class="dlg-head"><h2 id="coTitle">🧾 Promptun hazır!</h2><button class="xbtn" data-close aria-label="Kapat">✕</button></div>
+  <div class="dlg-body" id="coBody"></div>
+</dialog>
+
+<dialog id="subDlg" aria-labelledby="subTitle">
+  <div class="dlg-head"><h2 id="subTitle">🔔 Son bir adım!</h2><button class="xbtn" data-close aria-label="Kapat">✕</button></div>
+  <div class="dlg-body" id="subBody"></div>
+</dialog>
+
+<dialog id="histDlg" aria-labelledby="histTitle">
+  <div class="dlg-head"><h2 id="histTitle">🧾 Eski fişlerim</h2><button class="xbtn" data-close aria-label="Kapat">✕</button></div>
+  <div class="dlg-body" id="histBody"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="livetoast" id="liveToast" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   AYARLAR
+   ========================================================= */
+const CONFIG = {
+  youtubeUrl: "https://www.youtube.com/@G%C3%B6r%C3%BCnmeyenTaraftv", // Kanal linki (@GörünmeyenTaraftv). Boş bırakılırsa abonelik adımı atlanır
+  youtubeName: "Görünmeyen Taraf"                                       // Kanal adı
+};
+
+/* Sekme renkleri: c1/c2 = degrade, at = koyu zeminde okunan vurgu rengi */
+const THEMES = {
+  home:  {c1:"#7c5cff", c2:"#3b82f6", at:"#a78bfa"},
+  video: {c1:"#f43f5e", c2:"#f97316", at:"#fb7185"},
+  image: {c1:"#0891b2", c2:"#2563eb", at:"#22d3ee"},
+  music: {c1:"#c026d3", c2:"#7c3aed", at:"#e879f9"},
+  voice: {c1:"#059669", c2:"#16a34a", at:"#4ade80"}
+};
+
+/* =========================================================
+   ÜRÜNLER  [Türkçe ad, emoji, İngilizce prompt parçası, {ekstra}]
+   Yeni ürünü listenin SONUNA ekleyin (paylaşım linkleri bozulmasın)
+   ========================================================= */
+const SUBJECT = [
+  ["Spor araba","🏎️","a sleek sports car"],
+  ["Süper araba","🚗","an exotic supercar"],
+  ["Klasik araba","🚙","a classic vintage car"],
+  ["Motosiklet","🏍️","a powerful motorcycle"],
+  ["Kadın model","👩","a stylish female model"],
+  ["Erkek model","👨","a confident male model"],
+  ["Sporcu","🏃","an athlete in motion"],
+  ["Çocuk","🧒","a joyful child"],
+  ["Vahşi hayvan","🐺","a majestic wild animal"],
+  ["Kedi / Köpek","🐶","an adorable pet"],
+  ["Ürün şişesi","🧴","a premium product bottle"],
+  ["Telefon / Teknoloji","📱","a sleek tech gadget"],
+  ["Ayakkabı","👟","a pair of stylish sneakers"],
+  ["Saat / Takı","⌚","a luxury watch"],
+  ["Yemek","🍝","a gourmet dish"],
+  ["Kahve / İçecek","☕","a steaming cup of coffee"],
+  ["Robot","🤖","a futuristic robot"],
+  ["Astronot","👨‍🚀","an astronaut"],
+  ["Savaşçı","⚔️","a lone warrior"],
+  ["Şehir manzarası","🌆","a sprawling city skyline"],
+  ["Doğa manzarası","🏔️","a breathtaking natural landscape"],
+  ["Ejderha","🐉","a colossal dragon"]
+];
+const PLACE = [
+  ["Gece şehir sokağı","🌃","a rain-soaked city street at night"],
+  ["Tokyo neon sokakları","🏮","the neon-lit streets of Tokyo"],
+  ["İstanbul / Boğaz","🌉","Istanbul with the Bosphorus in the background"],
+  ["Dağ yolu","⛰️","a winding mountain road"],
+  ["Çöl","🏜️","a vast golden desert"],
+  ["Sahil","🏖️","a tropical beach shoreline"],
+  ["Orman","🌲","a misty ancient forest"],
+  ["Karlı arazi","❄️","a snowy frozen landscape"],
+  ["Yarış pisti","🏁","a professional race track"],
+  ["Yer altı otoparkı","🅿️","an underground parking garage"],
+  ["Stüdyo (siyah fon)","⬛","an infinite black studio backdrop"],
+  ["Stüdyo (beyaz fon)","⬜","a clean white seamless studio"],
+  ["Lüks penthouse","🏙️","a luxury penthouse interior"],
+  ["Antik harabeler","🏛️","ancient stone ruins"],
+  ["Fütüristik şehir","🛸","a futuristic sci-fi metropolis"],
+  ["Uzay","🪐","deep outer space"],
+  ["Su altı","🌊","a vivid underwater world"]
+];
+const STYLE = [
+  ["Sinematik","🎞️","cinematic filmic look"],
+  ["Hiper-gerçekçi CGI","💎","hyper-realistic CGI with Unreal Engine 5 render quality"],
+  ["Fotogerçekçi","📷","photorealistic"],
+  ["Anime","⛩️","anime style"],
+  ["Pixar tarzı 3D","🧸","Pixar-style 3D animation"],
+  ["Retro VHS","📼","retro VHS aesthetic with tape grain"],
+  ["Cyberpunk","🌆","cyberpunk aesthetic"],
+  ["Film noir","🕵️","film noir style"],
+  ["Vintage 35mm","🎬","vintage 35mm film with grain"],
+  ["Minimalist","◻️","clean minimalist aesthetic"],
+  ["Claymation","🟤","claymation stop-motion style"],
+  ["Çizgi roman","💥","comic book style"],
+  ["Lüks / Premium","👑","luxurious premium aesthetic"],
+  ["Rüya gibi","☁️","dreamy surreal atmosphere"],
+  ["Wes Anderson tarzı","🎀","symmetrical pastel Wes Anderson-inspired composition"],
+  ["Blockbuster","💣","Hollywood blockbuster look"]
+];
+const IMG_STYLE = STYLE.concat([
+  ["Yağlı boya","🖼️","oil painting"],
+  ["Suluboya","💧","soft watercolor painting"],
+  ["Kalem çizim","✏️","detailed pencil sketch"],
+  ["Low poly","🔺","low poly 3D art"],
+  ["İzometrik","🧊","isometric 3D illustration"],
+  ["Düz vektör","📐","flat vector illustration"]
+]);
+const LIGHT = [
+  ["Golden hour","🌅","warm golden hour sunlight"],
+  ["Mavi saat","🌆","moody blue hour"],
+  ["Neon gece","💜","vibrant neon lights at night"],
+  ["Sisli","🌫️","thick atmospheric fog"],
+  ["Yağmurlu","🌧️","rain with wet reflective surfaces"],
+  ["Volumetrik ışık","🔦","volumetric god rays"],
+  ["Stüdyo ışığı","💡","professional softbox studio lighting"],
+  ["Rim light","✨","strong rim lighting outlining the subject"],
+  ["Karanlık & yüksek kontrast","🌑","low-key high-contrast lighting"],
+  ["Lens flare","☀️","anamorphic lens flares"],
+  ["Ateş & kıvılcım","🔥","sparks and firelight"],
+  ["Doğal gün ışığı","🌤️","soft natural daylight"]
+];
+const COLOR = [
+  ["Teal & orange","🟠","teal and orange color grading"],
+  ["Soğuk mavi","🧊","cold blue tones"],
+  ["Sıcak altın","🟡","warm golden tones"],
+  ["Siyah-beyaz","⚫","black and white"],
+  ["Pastel","🩷","soft pastel palette"],
+  ["Neon pembe-mor","🟣","neon pink and purple palette"],
+  ["Doygun & canlı","🌈","highly saturated vivid colors"],
+  ["Mat / desatüre","🩶","muted desaturated matte look"],
+  ["Doğal","🍃","natural true-to-life colors"]
+];
+const MOOD = [
+  ["Heyecan","🔥","exciting"],
+  ["Lüks","💎","luxurious"],
+  ["Nostalji","📻","nostalgic"],
+  ["Komik","😂","funny and playful"],
+  ["Gerilim","😰","suspenseful"],
+  ["İlham verici","🌟","inspiring"],
+  ["Hüzünlü","🥀","melancholic"],
+  ["Agresif / enerjik","⚡","aggressive and high-energy"],
+  ["Huzurlu","🧘","calm and peaceful"],
+  ["Gizemli","🌒","mysterious"],
+  ["Romantik","❤️","romantic"],
+  ["Epik","🏆","epic and grand"]
+];
+const NEG = [
+  ["Bulanıklık","🌫️","blurry"],
+  ["Titreme","〰️","flickering"],
+  ["Bozuk eller","🖐️","deformed hands"],
+  ["Fazla parmak","☝️","extra fingers"],
+  ["Çarpık yüz","😵","distorted faces"],
+  ["Yazı hatası","🔤","garbled text"],
+  ["Filigran / logo","©️","watermarks"],
+  ["Düşük kalite","📉","low resolution"],
+  ["Plastik görünüm","🧪","plastic artificial look"],
+  ["Aşırı doygunluk","🎨","oversaturated colors"]
+];
+
+/* A(anahtar, başlık, emoji, ürünler, {q: basit soru, help: açıklama, single, role, lead}) */
+const A = (key,title,emoji,items,opt={}) => ({key,title,emoji,items,role:'line',...opt});
+
+const DEPTS = [
+{ key:"video", name:"Video", emoji:"🎬", fallback:"a cinematic video", open:s=>s, noteMode:"subject",
+  title:"Video için prompt", sub:"Reels, TikTok, reklam, araba edit, müzik klibi…", ex:"Reels, TikTok, reklam, edit",
+  noteLabel:"Eklemek istediğin bir detay var mı?", noteHelp:"Zorunlu değil. Türkçe yazabilirsin.", notePh:"Örn: kırmızı bir BMW gece İstanbul'da drift atıyor",
+  steps:["tur","ozne","mekan","stil","kamera","edit","sfx","muzik","format","sure","arac"],
+  extra:["duygu","isik","renk","yazi","kalite","negatif"],
+  aisles:[
+  A("tur","Video türü","🎬",[
+    ["Reklam / Tanıtım","📢","a high-end commercial advertisement"],
+    ["Shorts / Reels / TikTok","📱","a punchy viral short-form video"],
+    ["Sinematik kısa film","🎞️","a cinematic short film scene"],
+    ["Müzik klibi","🎤","a stylish music video"],
+    ["Ürün tanıtımı","📦","a premium product showcase video"],
+    ["Araba CGI edit","🏎️","a hyper-realistic CGI car edit"],
+    ["Oyun montajı","🎮","an intense gaming montage"],
+    ["Vlog edit","🤳","a dynamic lifestyle vlog edit"],
+    ["Eğitim videosu","🎓","a clear and engaging educational explainer video"],
+    ["Belgesel","🌍","a documentary-style sequence"],
+    ["Emlak turu","🏠","a smooth real-estate walkthrough tour"],
+    ["Yemek videosu","🍔","a mouth-watering food commercial"],
+    ["Düğün / Anı","💍","an emotional wedding memory film"],
+    ["Anime sahnesi","⛩️","an anime-style animated scene"],
+    ["Spor / Fitness","🏋️","a high-energy sports and fitness promo"],
+    ["Moda","👗","a fashion campaign film"],
+    ["Oyun fragmanı","🕹️","an epic video game trailer"],
+    ["Film fragmanı","🍿","a blockbuster movie trailer"]
+  ],{single:true,role:"type",q:"Ne tür bir video yapmak istiyorsun?",help:"Birini seç. Emin değilsen en yakın olanı seç."}),
+  A("ozne","Ana karakter / Özne","⭐",SUBJECT,{role:"subject",q:"Videoda ne ya da kim olsun?",help:"Listede yoksa atla; sonda kendin yazabilirsin."}),
+  A("mekan","Mekan","📍",PLACE,{role:"place",q:"Nerede geçsin?",help:"Bir yer seç ya da atla."}),
+  A("stil","Görsel stil","🎨",STYLE,{lead:"Visual style",q:"Nasıl görünsün?",help:"Görüntünün tarzı. Bir iki tane yeter."}),
+  A("kamera","Kamera hareketi","🎥",[
+    ["Drone çekimi","🚁","sweeping aerial drone shot"],
+    ["FPV dalış","🎯","fast FPV drone dive"],
+    ["Orbit (etrafında dön)","🔄","360-degree orbit around the subject"],
+    ["Tracking shot","🛤️","smooth tracking shot following the subject"],
+    ["Dolly zoom","🌀","dramatic dolly zoom (vertigo effect)"],
+    ["Alçak açı","⬆️","low-angle hero shot"],
+    ["Kuş bakışı","🦅","top-down bird's-eye view"],
+    ["Crane","🏗️","rising crane shot"],
+    ["Whip pan","💨","fast whip pan"],
+    ["El kamerası","✋","handheld camera with natural shake"],
+    ["Yakın plan","🔍","extreme close-up details"],
+    ["Makro","🐜","macro shot"],
+    ["Slow motion","🐢","slow motion"],
+    ["Time-lapse","⏱️","time-lapse"],
+    ["Statik geniş plan","🖼️","static wide establishing shot"],
+    ["Tek plan (oner)","🎥","one continuous take"]
+  ],{lead:"Camera",q:"Kamera nasıl hareket etsin?",help:"Bilmiyorsan \"Drone çekimi\" ya da \"Tracking shot\" hep güzel durur."}),
+  A("isik","Işık & atmosfer","💡",LIGHT,{lead:"Lighting and atmosphere",q:"Işık ve hava nasıl olsun?"}),
+  A("renk","Renk paleti","🎨",COLOR,{lead:"Color grade",q:"Hangi renkler ağır bassın?"}),
+  A("edit","Edit & kurgu","✂️",[
+    ["Beat'e senkron hızlı kesmeler","🥁","fast cuts synced to the beat"],
+    ["Velocity edit","⚡","velocity edit"],
+    ["Speed ramp","📈","dramatic speed ramping"],
+    ["Zoom geçişi","🔎","punchy zoom transitions"],
+    ["Glitch geçişi","📺","glitch transitions"],
+    ["Whip geçişi","💨","whip-pan transitions"],
+    ["Kamera sarsıntısı","📳","camera shake on impacts"],
+    ["Flash efekti","⚪","white flash frames on the beat"],
+    ["Freeze frame","🧊","freeze-frame moments"],
+    ["Split screen","🔲","split-screen sequences"],
+    ["Motion blur","🌪️","heavy motion blur"],
+    ["Film yanığı geçişi","🎞️","film burn transitions"],
+    ["Tersine oynatma","⏪","reverse playback moments"],
+    ["Sahne sahne storyboard","🗂️","structured as a 3-shot sequence (opening hook, build-up, climactic ending)"]
+  ],{lead:"Editing",q:"Kurgu (edit) nasıl olsun?",help:"Sahnelerin birbirine nasıl bağlanacağı."}),
+  A("sfx","SFX / Ses efektleri","🔊",[
+    ["Whoosh","💨","whoosh sounds on transitions"],
+    ["Bass drop","🔊","a heavy bass drop"],
+    ["Riser","📈","a tension-building riser"],
+    ["Impact / Boom","💥","cinematic impact booms"],
+    ["Motor / egzoz sesi","🏎️","roaring engine and exhaust sounds"],
+    ["Lastik sesi","🛞","screeching tires"],
+    ["Glitch sesi","📺","digital glitch sounds"],
+    ["Deklanşör sesi","📸","camera shutter clicks"],
+    ["Ortam sesi","🏙️","an immersive ambient soundscape"],
+    ["Yağmur & gök gürültüsü","⛈️","rain and thunder"],
+    ["Kalp atışı","❤️","a tense heartbeat"],
+    ["ASMR","🎧","crisp ASMR sounds"],
+    ["Kalabalık / tezahürat","🙌","a cheering crowd"]
+  ],{lead:"Sound design",q:"Hangi ses efektleri (SFX) olsun?",help:"Videoya hareket katan kısa sesler."}),
+  A("muzik","Müzik","🎵",[
+    ["Phonk","🌙","drift phonk with cowbells"],
+    ["Trap","🎧","a hard-hitting trap beat"],
+    ["Epik orkestra","🎻","an epic orchestral score"],
+    ["Lo-fi","☕","a chill lo-fi beat"],
+    ["Synthwave","🌆","retro synthwave"],
+    ["EDM","🎛️","energetic EDM"],
+    ["Hip-hop","🎤","boom-bap hip-hop"],
+    ["Rock","🎸","driving rock guitars"],
+    ["Duygusal piyano","🎹","emotional piano"],
+    ["Türk ritimleri","🪘","Turkish percussion and saz"],
+    ["Müziksiz","🔇","no music, sound effects only"]
+  ],{lead:"Music",q:"Arka planda hangi müzik çalsın?"}),
+  A("yazi","Yazı & altyazı","🔤",[
+    ["Kinetik tipografi","🔠","kinetic typography"],
+    ["Kelime kelime altyazı","💬","bold word-by-word captions in TikTok style"],
+    ["Büyük başlık","🅰️","a bold title card"],
+    ["Logo reveal","✴️","a logo reveal at the end"],
+    ["Harekete çağrı (CTA)","👉","a call-to-action at the end"],
+    ["Fiyat / indirim etiketi","🏷️","an animated price and discount tag"],
+    ["Yazısız","🚫","no on-screen text"]
+  ],{lead:"On-screen text",q:"Ekranda yazı olsun mu?"}),
+  A("duygu","Duygu & his","😃",MOOD,{lead:"Mood",q:"İzleyen nasıl hissetsin?"}),
+  A("format","Format","📐",[
+    ["9:16 dikey (Shorts/Reels)","📱","9:16 vertical",{ar:"9:16"}],
+    ["16:9 yatay (YouTube)","🖥️","16:9 widescreen",{ar:"16:9"}],
+    ["1:1 kare","⏹️","1:1 square",{ar:"1:1"}],
+    ["4:5 (Instagram)","🖼️","4:5 portrait",{ar:"4:5"}],
+    ["21:9 sinema","🎬","21:9 anamorphic cinemascope",{ar:"21:9"}]
+  ],{single:true,role:"format",q:"Nerede paylaşacaksın?",help:"Telefon için dikey (9:16), YouTube için yatay (16:9)."}),
+  A("sure","Süre","⏱️",[
+    ["5 sn","5️⃣","5 seconds",{sec:5}],
+    ["10 sn","🔟","10 seconds",{sec:10}],
+    ["15 sn","⏱️","15 seconds",{sec:15}],
+    ["30 sn","⏲️","30 seconds",{sec:30}],
+    ["60 sn","🕐","60 seconds",{sec:60}]
+  ],{single:true,role:"format",q:"Ne kadar uzun olsun?",help:"Yapay zekâ en iyi 5–10 saniyede çalışır."}),
+  A("kalite","Kalite","💎",[
+    ["4K","🔷","4K resolution"],
+    ["60 fps akıcı","🎚️","smooth 60fps motion"],
+    ["24 fps sinematik","🎞️","cinematic 24fps motion"],
+    ["HDR","🌗","HDR"],
+    ["Kusursuz döngü (loop)","🔁","seamless loop"],
+    ["8K","💠","8K resolution"]
+  ],{role:"format",q:"Kalite ayarları"}),
+  A("arac","Yapay zekâ aracı","🤖",[
+    ["Genel (her araç)","🌐","",{tool:"general"}],
+    ["Sora","🌀","",{tool:"sora"}],
+    ["Veo","🔷","",{tool:"veo"}],
+    ["Kling","🎥","",{tool:"kling"}],
+    ["Runway","🛫","",{tool:"runway"}],
+    ["Hailuo","🌊","",{tool:"hailuo"}],
+    ["Luma","✨","",{tool:"luma"}]
+  ],{single:true,role:"tool",q:"Hangi yapay zekâyı kullanacaksın?",help:"Bilmiyorsan \"Genel\"i seç, her yerde çalışır."}),
+  A("negatif","Olmasın (negatif)","🚫",NEG,{role:"neg",q:"Neler kesinlikle OLMASIN?",help:"Yapay zekânın sık yaptığı hataları engeller."})
+]},
+
+{ key:"image", name:"Görsel", emoji:"🖼️", fallback:"a stunning image", open:s=>s, noteMode:"subject",
+  title:"Görsel için prompt", sub:"YouTube kapağı, poster, ürün fotoğrafı, duvar kağıdı…", ex:"Kapak, poster, fotoğraf, logo",
+  noteLabel:"Görselde ne olsun? Kısaca yaz", noteHelp:"Zorunlu değil. Türkçe yazabilirsin.", notePh:"Örn: kahve fincanı, üstünden buhar çıkıyor, arkada yağmurlu cam",
+  steps:["tur","ozne","mekan","stil","isik","format","arac"],
+  extra:["aci","renk","duygu","kalite","negatif"],
+  aisles:[
+  A("tur","Görsel türü","🖼️",[
+    ["Ürün fotoğrafı","📦","a professional product photograph"],
+    ["Portre","🧑","a striking portrait"],
+    ["YouTube kapak (thumbnail)","▶️","an eye-catching YouTube thumbnail"],
+    ["Poster / afiş","🪧","a bold poster design"],
+    ["Duvar kağıdı","📱","a stunning wallpaper"],
+    ["Instagram gönderisi","📸","a scroll-stopping Instagram post"],
+    ["İllüstrasyon","🖌️","a detailed illustration"],
+    ["Konsept sanat","🗺️","epic concept art"],
+    ["Karakter tasarımı","🦸","a character design sheet"],
+    ["Sticker","🏷️","a cute die-cut sticker"],
+    ["Albüm kapağı","💿","an album cover artwork"],
+    ["Mimari render","🏢","an architectural visualization render"],
+    ["Logo","✴️","a minimal modern logo"],
+    ["Kitap kapağı","📕","a book cover design"],
+    ["Tişört baskısı","👕","a t-shirt print graphic"]
+  ],{single:true,role:"type",q:"Ne tür bir görsel istiyorsun?",help:"Birini seç."}),
+  A("ozne","Ana karakter / Özne","⭐",SUBJECT,{role:"subject",q:"Görselde ne ya da kim olsun?",help:"Listede yoksa atla; sonda kendin yazabilirsin."}),
+  A("mekan","Mekan","📍",PLACE,{role:"place",q:"Arka planda neresi olsun?"}),
+  A("stil","Stil","🎨",IMG_STYLE,{lead:"Style",q:"Nasıl görünsün?",help:"Fotoğraf mı, çizim mi, anime mi?"}),
+  A("aci","Çekim açısı & lens","📷",[
+    ["Yakın plan","🔍","close-up shot"],
+    ["Geniş açı","🌄","wide-angle shot"],
+    ["Kuş bakışı","🦅","bird's-eye view"],
+    ["Göz hizası","👁️","eye-level shot"],
+    ["Alçak açı","⬆️","low-angle shot"],
+    ["85mm portre lens","📷","shot on an 85mm lens"],
+    ["35mm","🎞️","shot on a 35mm lens"],
+    ["Balık gözü","🐟","fisheye lens"],
+    ["Makro","🐜","macro photography"],
+    ["Bokeh arka plan","🔵","creamy bokeh background"],
+    ["Simetrik kompozisyon","⚖️","perfectly symmetrical composition"]
+  ],{lead:"Composition",q:"Hangi açıdan çekilsin?"}),
+  A("isik","Işık","💡",LIGHT,{lead:"Lighting",q:"Işık nasıl olsun?"}),
+  A("renk","Renkler","🎨",COLOR,{lead:"Colors",q:"Hangi renkler ağır bassın?"}),
+  A("duygu","Duygu & his","😃",MOOD,{lead:"Mood",q:"Nasıl bir his versin?"}),
+  A("kalite","Kalite","💎",[
+    ["Ultra detay","🔬","ultra-detailed"],
+    ["Keskin odak","🎯","tack-sharp focus"],
+    ["Ödüllü fotoğraf","🏆","award-winning photography"],
+    ["8K","💠","8K"],
+    ["Profesyonel rötuş","✨","professionally retouched"]
+  ],{lead:"Quality",q:"Kalite ayarları"}),
+  A("format","Format","📐",[
+    ["1:1 kare","⏹️","square 1:1 aspect ratio",{ar:"1:1"}],
+    ["9:16 dikey","📱","vertical 9:16 aspect ratio",{ar:"9:16"}],
+    ["16:9 yatay","🖥️","widescreen 16:9 aspect ratio",{ar:"16:9"}],
+    ["4:5 Instagram","🖼️","4:5 portrait aspect ratio",{ar:"4:5"}],
+    ["2:3 poster","🪧","2:3 poster aspect ratio",{ar:"2:3"}],
+    ["3:2 fotoğraf","📷","3:2 photo aspect ratio",{ar:"3:2"}]
+  ],{single:true,role:"format",q:"Görsel hangi şekilde olsun?",help:"Telefon için dikey, YouTube kapağı için yatay."}),
+  A("arac","Yapay zekâ aracı","🤖",[
+    ["Genel (her araç)","🌐","",{tool:"general"}],
+    ["Midjourney","⛵","",{tool:"midjourney"}],
+    ["ChatGPT / DALL·E","💬","",{tool:"gpt"}],
+    ["Flux","⚡","",{tool:"flux"}],
+    ["Stable Diffusion","🧪","",{tool:"sd"}],
+    ["Ideogram (yazılı görsel)","🔤","",{tool:"ideogram"}],
+    ["Leonardo","🦁","",{tool:"leonardo"}]
+  ],{single:true,role:"tool",q:"Hangi yapay zekâyı kullanacaksın?",help:"Bilmiyorsan \"Genel\"i seç, her yerde çalışır."}),
+  A("negatif","Olmasın (negatif)","🚫",NEG,{role:"neg",q:"Neler kesinlikle OLMASIN?",help:"Yapay zekânın sık yaptığı hataları engeller."})
+]},
+
+{ key:"music", name:"Müzik", emoji:"🎵", fallback:"an original music track", open:s=>"a "+s+" track", noteMode:"theme",
+  title:"Müzik için prompt", sub:"Phonk, lo-fi, reklam jingle'ı, arabesk…", ex:"Phonk, lo-fi, jingle, şarkı",
+  noteLabel:"Şarkı ne hakkında olsun?", noteHelp:"Zorunlu değil. Türkçe yazabilirsin.", notePh:"Örn: gece yolculuğu, yalnızlık ve özgürlük",
+  steps:["tur","duygu","tempo","vokal","dil","arac"],
+  extra:["enstruman","yapi"],
+  aisles:[
+  A("tur","Tür","🎵",[
+    ["Phonk","🌙","drift phonk"],
+    ["Trap","🎧","trap"],
+    ["Lo-fi","☕","lo-fi hip-hop"],
+    ["Synthwave","🌆","synthwave"],
+    ["Epik orkestra","🎻","epic orchestral"],
+    ["Sinematik trailer","🎬","cinematic trailer"],
+    ["EDM","🎛️","EDM"],
+    ["Deep house","🏠","deep house"],
+    ["Pop","🎤","pop"],
+    ["Rock","🎸","rock"],
+    ["Rap / Hip-hop","🧢","hip-hop"],
+    ["Drill","🔩","UK drill"],
+    ["Arabesk","🌹","Turkish arabesque"],
+    ["Türkçe pop","🇹🇷","Turkish pop"],
+    ["Anadolu rock","🪕","Anatolian psychedelic rock"],
+    ["Ambient","🌌","ambient"],
+    ["Jazz","🎷","jazz"],
+    ["Reggaeton","💃","reggaeton"],
+    ["Afrobeats","🥁","afrobeats"],
+    ["Arabesk trap","🌹","arabesque trap fusion"]
+  ],{role:"type",q:"Hangi tarz müzik?",help:"Bir ya da iki tane seç."}),
+  A("duygu","Duygu","😃",MOOD,{lead:"Mood",q:"Nasıl bir his versin?"}),
+  A("tempo","Tempo","🥁",[
+    ["Yavaş (~70 BPM)","🐢","slow tempo around 70 BPM"],
+    ["Orta (~100 BPM)","🚶","mid tempo around 100 BPM"],
+    ["Hızlı (~128 BPM)","🏃","fast tempo around 128 BPM"],
+    ["Çok hızlı (150+ BPM)","🚀","very fast tempo over 150 BPM"]
+  ],{single:true,lead:"Tempo",q:"Ne kadar hızlı olsun?"}),
+  A("enstruman","Enstrümanlar","🎸",[
+    ["808 bas","🔊","heavy 808 bass"],
+    ["Cowbell","🔔","phonk cowbell"],
+    ["Elektro gitar","🎸","electric guitar"],
+    ["Akustik gitar","🪕","acoustic guitar"],
+    ["Piyano","🎹","piano"],
+    ["Yaylılar","🎻","lush strings"],
+    ["Bağlama / saz","🪕","Turkish bağlama (saz)"],
+    ["Ney","🎋","Turkish ney flute"],
+    ["Darbuka","🪘","darbuka percussion"],
+    ["Synth","🎛️","analog synths"],
+    ["Davul","🥁","punchy drums"],
+    ["Koro","🙌","choir"],
+    ["Saksafon","🎷","saxophone"],
+    ["Trompet","🎺","trumpet"]
+  ],{lead:"Instruments",q:"Hangi enstrümanlar çalsın?"}),
+  A("vokal","Vokal","🎙️",[
+    ["Enstrümantal","🚫","instrumental, no vocals"],
+    ["Erkek vokal","👨","male vocals"],
+    ["Kadın vokal","👩","female vocals"],
+    ["Rap vokal","🧢","rap vocals"],
+    ["Düet","👫","male and female duet"],
+    ["Vokal chop","✂️","chopped vocal samples"],
+    ["Koro vokal","🙌","choir vocals"]
+  ],{single:true,lead:"Vocals",q:"Şarkıyı söyleyen biri olsun mu?",help:"Sadece müzik istiyorsan \"Enstrümantal\"i seç."}),
+  A("dil","Söz dili","🌍",[
+    ["Türkçe","🇹🇷","Turkish lyrics"],
+    ["İngilizce","🇬🇧","English lyrics"],
+    ["İspanyolca","🇪🇸","Spanish lyrics"],
+    ["Almanca","🇩🇪","German lyrics"]
+  ],{single:true,lead:"Language",q:"Sözler hangi dilde olsun?",help:"Enstrümantal seçtiysen atla."}),
+  A("yapi","Şarkı yapısı","🧱",[
+    ["Güçlü intro","🚪","strong catchy intro"],
+    ["Build-up","📈","tension build-up"],
+    ["Bass drop","🔊","massive bass drop"],
+    ["Akılda kalan nakarat","🔁","catchy memorable chorus"],
+    ["Loop'a uygun","♾️","loopable structure"],
+    ["Fade out","🌅","fade-out ending"],
+    ["Kısa jingle (≤15 sn)","🔔","short jingle under 15 seconds"]
+  ],{lead:"Structure",q:"Şarkının yapısı nasıl olsun?"}),
+  A("arac","Yapay zekâ aracı","🤖",[
+    ["Genel (her araç)","🌐","",{tool:"general"}],
+    ["Suno","☀️","",{tool:"suno"}],
+    ["Udio","🎶","",{tool:"udio"}]
+  ],{single:true,role:"tool",q:"Hangi yapay zekâyı kullanacaksın?",help:"Bilmiyorsan \"Suno\" en kolayıdır."})
+]},
+
+{ key:"voice", name:"Ses", emoji:"🎙️", fallback:"a professional voice-over", open:s=>s, noteMode:"script",
+  title:"Seslendirme için prompt", sub:"Reklam sesi, belgesel anlatıcı, hikâye, oyun karakteri…", ex:"Reklam sesi, anlatıcı, hikâye",
+  noteLabel:"Okunacak metni yaz", noteHelp:"Yapay zekâ bu metni seslendirecek.", notePh:"Okunacak metni buraya yaz…",
+  steps:["tur","ses","ton","dil","tempo","arac"],
+  extra:["efekt"],
+  aisles:[
+  A("tur","Seslendirme türü","🎙️",[
+    ["Reklam spotu","📢","a commercial voice-over"],
+    ["Belgesel anlatıcı","🌍","a documentary narration"],
+    ["YouTube anlatım","▶️","a YouTube video narration"],
+    ["Masal / hikâye","📖","a bedtime story narration"],
+    ["Oyun karakteri","🎮","a video game character voice"],
+    ["Haber spikeri","📰","a news anchor read"],
+    ["Podcast intro","🎧","a podcast intro"],
+    ["Telefon karşılama","☎️","a phone system greeting"],
+    ["Fragman sesi","🎬","an epic movie trailer voice"]
+  ],{single:true,role:"type",q:"Seslendirme ne için?",help:"Birini seç."}),
+  A("ses","Ses tipi","🗣️",[
+    ["Derin erkek","👨","a deep resonant male voice"],
+    ["Genç erkek","🧑","a young male voice"],
+    ["Sıcak kadın","👩","a warm female voice"],
+    ["Enerjik kadın","💃","an energetic female voice"],
+    ["Çocuk","🧒","a child's voice"],
+    ["Yaşlı bilge","🧙","a wise elderly voice"],
+    ["Robotik","🤖","a robotic synthetic voice"],
+    ["Fısıltı","🤫","a soft whisper"]
+  ],{single:true,lead:"Voice",q:"Nasıl bir ses olsun?"}),
+  A("ton","Ton","🎭",[
+    ["Heyecanlı","🔥","excited"],
+    ["Sakin","🧘","calm"],
+    ["Dramatik","🎭","dramatic"],
+    ["Komik","😂","humorous"],
+    ["Güven veren","🤝","trustworthy"],
+    ["Gizemli","🌒","mysterious"],
+    ["Samimi","😊","friendly and conversational"],
+    ["Otoriter","🦁","authoritative"]
+  ],{lead:"Tone",q:"Ses tonu nasıl olsun?"}),
+  A("tempo","Konuşma hızı","⏩",[
+    ["Yavaş & tane tane","🐢","slow and deliberate pace"],
+    ["Normal","🚶","natural pace"],
+    ["Hızlı","🏃","fast energetic pace"]
+  ],{single:true,lead:"Pace",q:"Ne hızda konuşsun?"}),
+  A("dil","Dil & aksan","🌍",[
+    ["Türkçe","🇹🇷","Turkish"],
+    ["İngilizce (Amerikan)","🇺🇸","English with an American accent"],
+    ["İngilizce (İngiliz)","🇬🇧","English with a British accent"],
+    ["Almanca","🇩🇪","German"],
+    ["Arapça","🇸🇦","Arabic"],
+    ["İspanyolca","🇪🇸","Spanish"]
+  ],{single:true,lead:"Language",q:"Hangi dilde konuşsun?"}),
+  A("efekt","Ses efekti","🎚️",[
+    ["Temiz stüdyo","🎙️","clean studio quality"],
+    ["Radyo efekti","📻","vintage radio filter"],
+    ["Yankı","🏔️","cavernous echo"],
+    ["Telefon hattı","☎️","telephone line filter"],
+    ["Stadyum anonsu","🏟️","stadium announcer reverb"]
+  ],{lead:"Effects",q:"Sese efekt eklensin mi?"}),
+  A("arac","Yapay zekâ aracı","🤖",[
+    ["Genel (her araç)","🌐","",{tool:"general"}],
+    ["ElevenLabs","🔊","",{tool:"eleven"}]
+  ],{single:true,role:"tool",q:"Hangi yapay zekâyı kullanacaksın?",help:"Bilmiyorsan \"ElevenLabs\" en bilinenidir."})
+]}
+];
+
+/* Hazır paketler */
+const COMBOS = [
+  {dept:"video",emoji:"🏎️",name:"Phonk Araba Edit",desc:"Gece, neon, egzoz sesi, beat'e oturan kesmeler.",picks:["tur:Araba CGI edit","ozne:Süper araba","mekan:Gece şehir sokağı","stil:Hiper-gerçekçi CGI","kamera:Tracking shot","kamera:Alçak açı","isik:Neon gece","isik:Yağmurlu","renk:Teal & orange","edit:Velocity edit","edit:Beat'e senkron hızlı kesmeler","edit:Kamera sarsıntısı","edit:Flash efekti","sfx:Motor / egzoz sesi","sfx:Whoosh","sfx:Bass drop","muzik:Phonk","duygu:Agresif / enerjik","format:9:16 dikey (Shorts/Reels)","sure:10 sn","kalite:4K","arac:Kling","negatif:Bulanıklık","negatif:Titreme"]},
+  {dept:"video",emoji:"💎",name:"Lüks Ürün Reklamı",desc:"Siyah stüdyo, altın ışık, yavaş dönen ürün.",picks:["tur:Reklam / Tanıtım","ozne:Ürün şişesi","mekan:Stüdyo (siyah fon)","stil:Lüks / Premium","kamera:Orbit (etrafında dön)","kamera:Makro","kamera:Slow motion","isik:Rim light","isik:Volumetrik ışık","renk:Sıcak altın","sfx:Impact / Boom","sfx:Whoosh","muzik:Epik orkestra","yazi:Logo reveal","duygu:Lüks","format:16:9 yatay (YouTube)","sure:10 sn","kalite:4K","arac:Veo"]},
+  {dept:"video",emoji:"📱",name:"Viral TikTok",desc:"Hızlı, komik, kelime kelime altyazılı.",picks:["tur:Shorts / Reels / TikTok","kamera:El kamerası","kamera:Yakın plan","edit:Beat'e senkron hızlı kesmeler","edit:Zoom geçişi","yazi:Kelime kelime altyazı","sfx:Whoosh","sfx:Glitch sesi","muzik:Trap","renk:Doygun & canlı","duygu:Komik","duygu:Heyecan","format:9:16 dikey (Shorts/Reels)","sure:10 sn"]},
+  {dept:"video",emoji:"🍔",name:"Yemek Reklamı",desc:"Makro çekim, ASMR, iştah açan renkler.",picks:["tur:Yemek videosu","ozne:Yemek","kamera:Makro","kamera:Slow motion","isik:Stüdyo ışığı","renk:Sıcak altın","sfx:ASMR","muzik:Lo-fi","yazi:Harekete çağrı (CTA)","format:9:16 dikey (Shorts/Reels)","sure:10 sn","kalite:4K"]},
+  {dept:"video",emoji:"🌍",name:"Doğa Belgeseli",desc:"Drone, golden hour, epik müzik.",picks:["tur:Belgesel","ozne:Doğa manzarası","kamera:Drone çekimi","kamera:Time-lapse","isik:Golden hour","stil:Sinematik","renk:Doğal","sfx:Ortam sesi","muzik:Epik orkestra","duygu:İlham verici","format:16:9 yatay (YouTube)","sure:10 sn","kalite:4K","kalite:24 fps sinematik"]},
+  {dept:"video",emoji:"🌆",name:"Cyberpunk Klip",desc:"Tokyo neon, glitch, synthwave.",picks:["tur:Müzik klibi","mekan:Tokyo neon sokakları","stil:Cyberpunk","isik:Neon gece","isik:Sisli","renk:Neon pembe-mor","edit:Glitch geçişi","edit:Speed ramp","muzik:Synthwave","duygu:Gizemli","format:16:9 yatay (YouTube)","sure:10 sn"]},
+  {dept:"video",emoji:"🍿",name:"Film Fragmanı",desc:"Hollywood havası, sahne sahne kurgu.",picks:["tur:Film fragmanı","ozne:Savaşçı","mekan:Antik harabeler","stil:Blockbuster","kamera:Crane","kamera:Dolly zoom","isik:Volumetrik ışık","isik:Karanlık & yüksek kontrast","sfx:Riser","sfx:Impact / Boom","muzik:Epik orkestra","duygu:Gerilim","duygu:Epik","yazi:Büyük başlık","edit:Sahne sahne storyboard","format:21:9 sinema","sure:10 sn"]},
+
+  {dept:"image",emoji:"▶️",name:"YouTube Kapağı",desc:"Tıklatan, canlı, keskin kapak görseli.",picks:["tur:YouTube kapak (thumbnail)","aci:Yakın plan","isik:Rim light","renk:Doygun & canlı","duygu:Heyecan","kalite:Keskin odak","kalite:Ultra detay","format:16:9 yatay","negatif:Yazı hatası","negatif:Bulanıklık"]},
+  {dept:"image",emoji:"📦",name:"Stüdyo Ürün Fotoğrafı",desc:"E-ticaret için temiz beyaz fon.",picks:["tur:Ürün fotoğrafı","ozne:Ürün şişesi","mekan:Stüdyo (beyaz fon)","stil:Fotogerçekçi","isik:Stüdyo ışığı","aci:Göz hizası","kalite:Keskin odak","kalite:Ödüllü fotoğraf","format:1:1 kare"]},
+  {dept:"image",emoji:"🧑",name:"Profesyonel Portre",desc:"85mm, bokeh, golden hour.",picks:["tur:Portre","aci:85mm portre lens","aci:Bokeh arka plan","isik:Golden hour","stil:Fotogerçekçi","renk:Doğal","format:4:5 Instagram","kalite:Keskin odak","negatif:Çarpık yüz","negatif:Plastik görünüm"]},
+  {dept:"image",emoji:"⛩️",name:"Anime Duvar Kağıdı",desc:"Telefon için neon anime manzarası.",picks:["tur:Duvar kağıdı","mekan:Tokyo neon sokakları","stil:Anime","isik:Neon gece","renk:Neon pembe-mor","duygu:Gizemli","format:9:16 dikey","kalite:Ultra detay","arac:Midjourney"]},
+  {dept:"image",emoji:"💿",name:"Albüm Kapağı",desc:"Rüya gibi, nostaljik, simetrik.",picks:["tur:Albüm kapağı","stil:Rüya gibi","stil:Vintage 35mm","renk:Pastel","duygu:Nostalji","aci:Simetrik kompozisyon","format:1:1 kare"]},
+
+  {dept:"music",emoji:"🌙",name:"Phonk Edit Müziği",desc:"Araba edit'leri için cowbell'li phonk.",picks:["tur:Phonk","duygu:Agresif / enerjik","tempo:Hızlı (~128 BPM)","enstruman:808 bas","enstruman:Cowbell","vokal:Vokal chop","yapi:Güçlü intro","yapi:Bass drop","arac:Suno"]},
+  {dept:"music",emoji:"☕",name:"Lo-fi Çalışma",desc:"Arka plan için sakin, döngüye uygun.",picks:["tur:Lo-fi","duygu:Huzurlu","tempo:Yavaş (~70 BPM)","enstruman:Piyano","vokal:Enstrümantal","yapi:Loop'a uygun"]},
+  {dept:"music",emoji:"🎬",name:"Epik Trailer",desc:"Koro, yaylılar, büyük final.",picks:["tur:Sinematik trailer","tur:Epik orkestra","duygu:Epik","tempo:Orta (~100 BPM)","enstruman:Yaylılar","enstruman:Koro","enstruman:Davul","yapi:Build-up","vokal:Enstrümantal"]},
+  {dept:"music",emoji:"🔔",name:"Reklam Jingle",desc:"Kısa, akılda kalan, neşeli.",picks:["tur:Pop","duygu:Heyecan","tempo:Hızlı (~128 BPM)","enstruman:Synth","vokal:Kadın vokal","dil:Türkçe","yapi:Kısa jingle (≤15 sn)","yapi:Akılda kalan nakarat"]},
+  {dept:"music",emoji:"🌹",name:"Arabesk Trap",desc:"Bağlama + 808, Türkçe hüzün.",picks:["tur:Arabesk trap","duygu:Hüzünlü","tempo:Orta (~100 BPM)","enstruman:Bağlama / saz","enstruman:808 bas","enstruman:Darbuka","vokal:Erkek vokal","dil:Türkçe","yapi:Akılda kalan nakarat"]},
+
+  {dept:"voice",emoji:"📢",name:"Reklam Spotu",desc:"Enerjik, samimi, temiz ses.",picks:["tur:Reklam spotu","ses:Enerjik kadın","ton:Heyecanlı","ton:Samimi","tempo:Normal","dil:Türkçe","efekt:Temiz stüdyo","arac:ElevenLabs"]},
+  {dept:"voice",emoji:"🌍",name:"Belgesel Anlatıcı",desc:"Derin, sakin, güven veren.",picks:["tur:Belgesel anlatıcı","ses:Derin erkek","ton:Sakin","ton:Güven veren","tempo:Yavaş & tane tane","dil:Türkçe"]},
+  {dept:"voice",emoji:"🎬",name:"Fragman Sesi",desc:"\"Öyle bir dünyada ki…\" havası.",picks:["tur:Fragman sesi","ses:Derin erkek","ton:Dramatik","ton:Otoriter","tempo:Yavaş & tane tane","dil:İngilizce (Amerikan)","efekt:Yankı"]}
+];
+
+/* Çelişki uyarıları */
+const CONFLICTS = [
+  ["video","kamera:Slow motion","edit:Beat'e senkron hızlı kesmeler","Slow motion ile hızlı kesmeler birbirini zayıflatabilir. İkisini de istiyorsan \"Speed ramp\" daha iyi çalışır."],
+  ["video","renk:Siyah-beyaz","isik:Neon gece","Siyah-beyaz renk paleti neon ışıkların rengini yok eder."],
+  ["video","renk:Siyah-beyaz","renk:Neon pembe-mor","Siyah-beyaz ile neon pembe-mor aynı anda olamaz."],
+  ["video","muzik:Lo-fi","duygu:Agresif / enerjik","Lo-fi sakin bir türdür; agresif hisle uyuşmayabilir."],
+  ["video","stil:Anime","stil:Hiper-gerçekçi CGI","Anime ve hiper-gerçekçi aynı anda zor; birini seç."],
+  ["video","kalite:60 fps akıcı","kalite:24 fps sinematik","Birini seç: 24 fps sinematik, 60 fps akıcı bir his verir."],
+  ["image","stil:Anime","stil:Fotogerçekçi","Anime ve fotogerçekçi aynı anda zor; birini seç."],
+  ["image","renk:Siyah-beyaz","renk:Doygun & canlı","Siyah-beyaz ile canlı renkler çelişir."],
+  ["music","tur:Lo-fi","tempo:Çok hızlı (150+ BPM)","Lo-fi genelde yavaştır; çok hızlı tempo türü bozabilir."]
+];
+
+/* Kasada gösterilen "nasıl kullanılır" adımları */
+const TOOL_HOWTO = {
+  general:["Promptu kopyala","Kullandığın yapay zekâ sitesini aç","Promptu yapıştır ve oluştur'a bas"],
+  sora:["Promptu kopyala","Sora'yı aç (sora.com)","Promptu yapıştır, oluştur'a bas","Uzun videoları sahnelere bölüp ayrı ayrı üret"],
+  veo:["Promptu kopyala","Veo'yu aç (Gemini veya Google Flow)","Promptu yapıştır; Veo sesleri de üretir"],
+  kling:["Promptu kopyala","Kling'i aç","Ana promptu ana kutuya, negatifi \"Negative Prompt\" kutusuna yapıştır"],
+  runway:["Promptu kopyala","Runway'i aç","En iyi sonuç için önce Görsel sekmesinden bir ilk kare üret, sonra image-to-video kullan"],
+  hailuo:["Promptu kopyala","Hailuo'yu aç","Promptu yapıştır ve oluştur'a bas"],
+  luma:["Promptu kopyala","Luma'yı aç","Promptu yapıştır; döngü (loop) seçeneğini ayrıca açabilirsin"],
+  midjourney:["Promptu kopyala","Midjourney'i aç","Tüm satırı yapıştır (--ar ve --no ayarları hazır)"],
+  gpt:["Promptu kopyala","ChatGPT'yi aç","\"Şu görseli oluştur:\" yaz ve promptu yapıştır"],
+  flux:["Promptu kopyala","Flux kullanan siteyi aç","Sadece ana promptu yapıştır (Flux negatif prompt kullanmaz)"],
+  sd:["Promptu kopyala","Stable Diffusion'ı aç","Ana promptu Prompt, negatifi Negative Prompt kutusuna yapıştır"],
+  ideogram:["Promptu kopyala","Ideogram'ı aç","Görselde yazı istiyorsan o yazıyı tırnak içinde ekle"],
+  leonardo:["Promptu kopyala","Leonardo'yu aç","Ana promptu ve negatifi ilgili kutulara yapıştır"],
+  suno:["Promptu kopyala","Suno'yu aç (suno.com)","\"Custom\" moda geç, metni \"Style of Music\" kutusuna yapıştır"],
+  udio:["Promptu kopyala","Udio'yu aç","Metni prompt kutusuna yapıştır"],
+  eleven:["Promptu kopyala","ElevenLabs'i aç","Açıklamayı \"Voice Design\" bölümüne, metni konuşma kutusuna yapıştır"]
+};
+
+/* =========================================================
+   MOTOR
+   ========================================================= */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+
+const ITEMS = {}, DEPT = {};
+DEPTS.forEach(d=>{
+  DEPT[d.key]=d; d.A={};
+  d.aisles.forEach(a=>{
+    d.A[a.key]=a;
+    a.items = a.items.map((r,i)=>{
+      const it = {id:`${d.key}.${a.key}.${i}`, label:r[0], emoji:r[1], p:r[2], ...(r[3]||{}), dept:d.key, aisle:a.key, a};
+      ITEMS[it.id]=it; return it;
+    });
+  });
+});
+function ref(dept,s){
+  const i=s.indexOf(":"); const ak=s.slice(0,i), label=s.slice(i+1);
+  const a=DEPT[dept] && DEPT[dept].A[ak];
+  const it=a && a.items.find(x=>x.label===label);
+  if(!it) console.warn("Promptoryum: ürün bulunamadı →",dept,s);
+  return it;
+}
+
+const state = {
+  view: LS.get('pm_view','home'),
+  mode: LS.get('pm_mode',{}),
+  step: LS.get('pm_step',{}),
+  extra: null,
+  cart: LS.get('pm_cart',[]).filter(id=>ITEMS[id]),
+  notes: LS.get('pm_notes',{})
+};
+if(state.view!=='home' && !DEPT[state.view]) state.view='home';
+function save(){ LS.set('pm_cart',state.cart); LS.set('pm_notes',state.notes); LS.set('pm_view',state.view); LS.set('pm_mode',state.mode); LS.set('pm_step',state.step); }
+const deptItems = dk => state.cart.map(id=>ITEMS[id]).filter(i=>i && i.dept===dk);
+const aisleCount = (dk,ak) => state.cart.filter(id=>ITEMS[id].dept===dk && ITEMS[id].aisle===ak).length;
+
+/* ---------- Prompt üretici ---------- */
+const joinList = a => { a=a.filter(Boolean); if(a.length<2) return a[0]||""; return a.slice(0,-1).join(", ")+" and "+a[a.length-1]; };
+const cap = s => s ? s.charAt(0).toUpperCase()+s.slice(1) : s;
+
+function buildPrompt(dk){
+  const d=DEPT[dk], sel=deptItems(dk), by={};
+  sel.forEach(i=>{ (by[i.aisle]=by[i.aisle]||[]).push(i); });
+  let typeP=[], subj=[], place=[], lines=[], fmt=[], neg=[], rest=[], ar=null, tool='general', toolName='Genel';
+  d.aisles.forEach(a=>{
+    const its=by[a.key]; if(!its) return;
+    const ps=its.map(i=>i.p).filter(Boolean);
+    switch(a.role){
+      case 'type': typeP=ps; break;
+      case 'subject': subj=ps; break;
+      case 'place': place=ps; break;
+      case 'format': fmt.push(...ps); its.forEach(i=>{ if(i.ar) ar=i.ar; }); break;
+      case 'neg': neg=ps; break;
+      case 'tool': tool=its[0].tool; toolName=its[0].label; break;
+      default: if(ps.length){ lines.push(`${a.lead}: ${joinList(ps)}.`); rest.push(...ps); }
+    }
+  });
+  const note=(state.notes[dk]||'').trim().replace(/\s+/g,' ');
+  const typeStr = typeP.length ? d.open(joinList(typeP)) : d.fallback;
+  let main;
+  if(tool==='suno' || tool==='udio'){
+    main = [...typeP, ...subj, ...rest, ...fmt].join(', ') || d.fallback;
+    if(note) main += `\n\nLyrics theme: ${note}`;
+  } else if(tool==='midjourney'){
+    const head = typeStr + (subj.length?` featuring ${joinList(subj)}`:'') + (note?`, ${note}`:'') + (place.length?`, set in ${joinList(place)}`:'');
+    main = [head, ...rest].join(', ') + ` --ar ${ar||'1:1'} --v 7` + (neg.length?` --no ${neg.join(', ')}`:'');
+    neg=[];
+  } else {
+    let open = cap(typeStr);
+    if(subj.length) open += ` featuring ${joinList(subj)}`;
+    if(note && d.noteMode==='subject') open += `: ${note}`;
+    if(place.length) open += `, set in ${joinList(place)}`;
+    open += '.';
+    const parts=[open, ...lines];
+    if(fmt.length) parts.push(`Format: ${fmt.join(', ')}.`);
+    if(note && d.noteMode==='theme') parts.push(`Lyrics theme: ${note}.`);
+    main = parts.join(' ');
+    if(note && d.noteMode==='script') main += `\n\nScript: "${note}"`;
+    if(tool==='flux') neg=[];
+  }
+  return { main, neg: neg.length? neg.join(', ') : null, toolName, tool };
+}
+
+/* ---------- Uyarılar ---------- */
+function getMessages(onlyDept){
+  const sel=new Set(state.cart), items=state.cart.map(id=>ITEMS[id]), out=[];
+  CONFLICTS.forEach(([dk,a,b,msg])=>{ const x=ref(dk,a), y=ref(dk,b); if(x&&y&&sel.has(x.id)&&sel.has(y.id)) out.push({d:dk,t:'warn',m:'⚠️ '+msg}); });
+  const has=(dk,ak)=>items.filter(i=>i.dept===dk&&i.aisle===ak);
+  const long=items.find(i=>i.dept==='video'&&i.sec>=30);
+  if(long) out.push({d:'video',t:'warn',m:`⏱️ Çoğu yapay zekâ tek seferde 5–10 sn video üretir. ${long.label} için videoyu parça parça üretip birleştir.`});
+  const mz=has('video','muzik'); if(mz.length>1 && mz.some(i=>i.label==='Müziksiz')) out.push({d:'video',t:'warn',m:'⚠️ "Müziksiz" ile başka müzik seçimi çelişiyor.'});
+  const yz=has('video','yazi'); if(yz.length>1 && yz.some(i=>i.label==='Yazısız')) out.push({d:'video',t:'warn',m:'⚠️ "Yazısız" ile başka yazı seçimi çelişiyor.'});
+  if(has('music','vokal').some(i=>i.label==='Enstrümantal') && has('music','dil').length) out.push({d:'music',t:'warn',m:'⚠️ Enstrümantal seçtin ama söz dili de seçili; söz dili yok sayılır.'});
+  if(deptItems('voice').length && !(state.notes.voice||'').trim()) out.push({d:'voice',t:'tip',m:'📝 Seslendirme: Okunacak metni yazmayı unutma.'});
+  return onlyDept ? out.filter(x=>x.d===onlyDept) : out;
+}
+
+/* ---------- Tema ---------- */
+function applyTheme(key){
+  const t=THEMES[key]||THEMES.home, r=document.documentElement.style;
+  r.setProperty('--c1',t.c1); r.setProperty('--c2',t.c2); r.setProperty('--at',t.at);
+}
+
+/* ---------- Gezinme ---------- */
+const snap=()=>({view:state.view, mode:state.view==='home'?null:state.mode[state.view], step:state.view==='home'?null:state.step[state.view], extra:state.extra});
+function go(view, mode, step, extra, push=true){
+  state.view=view;
+  if(view!=='home'){ if(mode) state.mode[view]=mode; else if(!state.mode[view]) state.mode[view]='start'; if(step!=null) state.step[view]=step; }
+  state.extra = extra||null;
+  save(); render(); window.scrollTo(0,0);
+  if(push) try{ history.pushState(snap(),''); }catch(e){}
+}
+addEventListener('popstate',e=>{ const s=e.state; if(!s){ go('home',null,null,null,false); return; } go(s.view,s.mode,s.step,s.extra,false); });
+
+/* ---------- Render ---------- */
+function render(){
+  const v=state.view;
+  applyTheme(v);
+  renderTabs();
+  const m=$('#main');
+  let inWiz=false;
+  if(v==='home') m.innerHTML=homeHTML();
+  else{
+    const d=DEPT[v], mode=state.mode[v]||'start';
+    if(mode==='wizard'){ m.innerHTML=wizardHTML(d); inWiz=true; }
+    else if(mode==='combos') m.innerHTML=combosHTML(d);
+    else if(mode==='done') m.innerHTML=doneHTML(d);
+    else m.innerHTML=startHTML(d);
+  }
+  document.body.classList.toggle('in-wizard',inWiz);
+  updateHeader();
+  renderLive();
+}
+
+/* ---------- Canlı akış (gerçek veri; sunucu yoksa gizli kalır) ---------- */
+const LIVE = { on:false, d:null, cid: Math.random().toString(36).slice(2,12) };
+function ago(t){
+  const s=Math.max(0,(Date.now()-t)/1000);
+  if(s<60) return 'az önce';
+  if(s<3600) return Math.floor(s/60)+' dk önce';
+  if(s<86400) return Math.floor(s/3600)+' sa önce';
+  const g=Math.floor(s/86400); return g===1?'dün':g+' gün önce';
+}
+function eventText(ev){
+  if(ev.type==='sub') return ['🔔','Bir ziyaretçi kanala abone oldu'];
+  if(ev.type==='prompt'){
+    const ds=(ev.depts||[]).map(k=>DEPT[k]).filter(Boolean);
+    return [ds.map(d=>d.emoji).join('') || '🧾', `Bir ziyaretçi ${ds.map(d=>d.name==='Ses'?'Seslendirme':d.name).join(' + ')} promptu aldı`];
+  }
+  return ['✨','Yeni hareket'];
+}
+function renderLive(){
+  const pill=$('#livePill'), card=$('#liveCard');
+  if(!LIVE.on || !LIVE.d){ pill.hidden=true; if(card) card.hidden=true; return; }
+  const d=LIVE.d;
+  pill.hidden=false; $('#liveN').textContent=d.online;
+  if(!card) return;
+  card.hidden=false;
+  const feed=(d.recent||[]).slice(0,6);
+  card.innerHTML=`<div class="live-h"><span class="dot"></span>CANLI</div>
+    <div class="live-stats">
+      <div><b>${d.online}</b><small>kişi şu an sitede</small></div>
+      <div><b>${d.subsToday}</b><small>bugün abone oldu</small></div>
+      <div><b>${d.promptsToday}</b><small>bugün prompt aldı</small></div>
+    </div>
+    <ul class="feed">${feed.length ? feed.map(ev=>{ const [e,t]=eventText(ev); return `<li><span>${e}</span><span>${esc(t)}</span><span class="tm">${ago(ev.t)}</span></li>`; }).join('')
+      : `<li class="emp">Henüz hareket yok. İlk sen ol! 🚀</li>`}</ul>`;
+}
+let ltTimer;
+function liveToast(ev){
+  const [e,t]=eventText(ev), el=$('#liveToast');
+  el.innerHTML=`<span class="dot"></span><span>${e} ${esc(t)}</span>`;
+  el.classList.add('show'); clearTimeout(ltTimer); ltTimer=setTimeout(()=>el.classList.remove('show'),4500);
+}
+function startLive(){
+  if(!('EventSource' in window) || !/^https?:$/.test(location.protocol)) return;
+  let es; try{ es=new EventSource('/live'); }catch(e){ return; }
+  es.onmessage=m=>{
+    let d; try{ d=JSON.parse(m.data); }catch(e){ return; }
+    LIVE.on=true; LIVE.d=d; renderLive();
+    if(d.event && d.cid!==LIVE.cid) liveToast(d.event);
+  };
+  es.onerror=()=>{ if(!LIVE.on) es.close(); };   // sunucu canlı akışı desteklemiyorsa sessizce kapat
+}
+function sendEvent(body){
+  if(!LIVE.on) return;
+  try{ fetch('/event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,cid:LIVE.cid}),keepalive:true}).catch(()=>{}); }catch(e){}
+}
+setInterval(()=>{ if(LIVE.on) renderLive(); },30000);
+
+function renderTabs(){
+  const tabs=[{key:'home',name:'Giriş',emoji:'🏠'}].concat(DEPTS);
+  $('#tabs').innerHTML = tabs.map(t=>{
+    const th=THEMES[t.key], n=t.key==='home'?0:deptItems(t.key).length, act=state.view===t.key;
+    return `<button class="tab ${act?'active':''}" data-view="${t.key}" style="--t1:${th.c1};--t2:${th.c2}" aria-current="${act?'page':'false'}">
+      <span class="em">${t.emoji}</span><span>${esc(t.name)}</span>${n?`<span class="badge">${n}</span>`:''}</button>`;
+  }).join('');
+}
+
+function homeHTML(){
+  return `<section class="home">
+    <img class="hero-avatar" src="avatar.webp" alt="Promptoryum" width="92" height="92">
+    <div class="eyebrow">Promptoryum · Hayal et, seç, oluştur</div>
+    <h1 class="big">Ne yapmak <em>istiyorsun?</em></h1>
+    <p class="lead">Aşağıdan birine dokun. Gerisini biz soracağız. Ücretsiz, kayıt yok. 👇</p>
+    <div class="homecards">
+      ${DEPTS.map(d=>{ const t=THEMES[d.key]; return `<button class="hc" data-view="${d.key}" style="--t1:${t.c1};--t2:${t.c2}">
+        <span class="em">${d.emoji}</span><b>${esc(d.name==='Ses'?'Seslendirme':d.name)}</b><small>${esc(d.ex)}</small><span class="go">Başla →</span></button>`; }).join('')}
+    </div>
+    <section class="live" id="liveCard" hidden aria-label="Canlı akış"></section>
+    <h2 class="sec">Nasıl çalışır?</h2>
+    <div class="how">
+      <div><i>1</i><span>👆 Ne yapacağını seç</span></div>
+      <div><i>2</i><span>💬 Basit soruları cevapla</span></div>
+      <div><i>3</i><span>🔔 Kanala abone ol</span></div>
+      <div><i>4</i><span>📋 Promptu kopyala, yapay zekâya yapıştır</span></div>
+    </div>
+  </section>`;
+}
+
+function startHTML(d){
+  const n=deptItems(d.key).length;
+  return `<section>
+    <div class="dhero"><span class="bem">${d.emoji}</span><h1 class="big">${esc(d.title)}</h1><p class="lead" style="margin:0">${esc(d.sub)}</p></div>
+    ${n?`<div class="resume"><span>🛒 Bu bölümden sepetinde ${n} şey var.</span><button class="btn primary" data-mode="done">Devam et →</button><button class="btn" data-action="reset-dept">Baştan başla</button></div>`:''}
+    <div class="choices">
+      <button class="choice main" data-mode="wizard" data-step="0"><span class="em">🧭</span><span><b>Adım adım seç</b><small>${d.steps.length} basit soru. Bilmediğini atla.</small></span><span class="arr">→</span></button>
+      <button class="choice" data-mode="combos"><span class="em">⚡</span><span><b>Hazır paket seç</b><small>En hızlısı. Tek dokunuşla hazır tarif.</small></span><span class="arr">→</span></button>
+      <button class="choice" data-action="random"><span class="em">🎲</span><span><b>Şaşırt beni</b><small>Rastgele bir tarif oluştur, sonra düzenle.</small></span><span class="arr">→</span></button>
+    </div>
+  </section>`;
+}
+
+function combosHTML(d){
+  const list=COMBOS.map((c,i)=>({c,i})).filter(x=>x.c.dept===d.key);
+  return `<section>
+    <button class="back" data-mode="start">← Geri</button>
+    <h1 class="q">⚡ Hazır paketler</h1>
+    <p class="help" style="margin-bottom:18px">Birine dokun, hepsi sepete eklensin.</p>
+    <div class="combos">${list.map(({c,i})=>`<button class="combo" data-combo="${i}">
+      <span class="em">${c.emoji}</span><span class="nm">${esc(c.name)}</span><span class="ds">${esc(c.desc)}</span>
+      <span class="ct">+ ${c.picks.length} ayar sepete →</span></button>`).join('')}</div>
+  </section>`;
+}
+
+function wizKeys(d){ return state.extra ? [state.extra] : d.steps; }
+function wizardHTML(d){
+  const keys=wizKeys(d), last=keys.length-1;
+  const i=state.extra?0:Math.max(0,Math.min(state.step[d.key]||0,last));
+  const a=d.A[keys[i]], n=aisleCount(d.key,a.key);
+  const top = state.extra
+    ? `<span class="pill">➕ Ekstra ayar</span>`
+    : `<span class="pill">Adım ${i+1} / ${keys.length}</span><div class="bar" aria-hidden="true"><i style="width:${(i+1)/keys.length*100}%"></i></div>`;
+  return `<section class="wiz">
+    <div class="wtop">${top}</div>
+    <h1 class="q">${a.emoji} ${esc(a.q||a.title)}</h1>
+    ${a.help?`<p class="help">${esc(a.help)}</p>`:''}
+    <p class="pickhint">${a.single?'👆 Bir tane seç':'👆 İstediğin kadar seç'}</p>
+    <div class="grid">${a.items.map(itemHTML).join('')}</div>
+  </section>
+  <div class="wiznav"><div class="in">
+    <button class="btn lg back2" data-nav="back">← Geri</button>
+    <button class="btn lg ${n?'primary':''}" data-nav="next" id="nextBtn">${nextLabel(d,i,n)}</button>
+  </div></div>`;
+}
+function nextLabel(d,i,n){
+  if(state.extra) return 'Tamam ✓';
+  const last=i>=wizKeys(d).length-1;
+  if(last) return n?'Bitir ✓':'Atla ve bitir →';
+  return n?'İleri →':'Atla →';
+}
+function itemHTML(it){
+  const sel=state.cart.includes(it.id);
+  return `<button class="item ${sel?'sel':''}" data-id="${it.id}" aria-pressed="${sel}">
+    <span class="em">${it.emoji}</span><span class="lb">${esc(it.label)}</span><span class="chk">✓</span></button>`;
+}
+function wizNav(dir){
+  const d=DEPT[state.view], keys=wizKeys(d), i=state.step[d.key]||0;
+  if(state.extra){ go(d.key,'done'); return; }
+  if(dir<0){ if(i<=0) go(d.key,'start'); else go(d.key,'wizard',i-1); }
+  else{ if(i>=keys.length-1) go(d.key,'done'); else go(d.key,'wizard',i+1); }
+}
+
+function doneHTML(d){
+  const its=deptItems(d.key), msgs=getMessages(d.key).filter(x=>x.t==='warn');
+  return `<section>
+    <div class="dhero"><span class="bem">${its.length?'🎉':'🤔'}</span>
+      <h1 class="big">${its.length?'Tarifin hazır!':'Henüz bir şey seçmedin'}</h1>
+      <p class="lead" style="margin:0">${its.length?'Kontrol et, istersen bir not ekle, sonra kasaya git.':'Adım adım seç ya da hazır paket kullan.'}</p></div>
+    ${its.length?`
+    <div class="card"><h3>🛒 Seçtiklerin <small>(${its.length})</small></h3>
+      <div class="chips">${its.map(i=>`<span class="chipx">${i.emoji} ${esc(i.label)}<button data-rm="${i.id}" aria-label="${esc(i.label)} çıkar">✕</button></span>`).join('')}</div></div>
+    <div class="card note"><label for="note">📝 ${esc(d.noteLabel)}</label><small>${esc(d.noteHelp)}</small>
+      <textarea id="note" rows="3" placeholder="${esc(d.notePh)}">${esc(state.notes[d.key]||'')}</textarea></div>
+    ${msgs.map(x=>`<p class="note-msg warn">${esc(x.m)}</p>`).join('')}
+    <div class="cta-wrap"><button class="btn primary xl" data-action="checkout">🧾 Kasaya git, promptumu al</button></div>
+    <div class="card"><h3>➕ Daha fazla ayar <small>(isteğe bağlı)</small></h3>
+      <div class="extras">${d.extra.map(k=>{ const a=d.A[k], n=aisleCount(d.key,k); return `<button data-extra="${k}">${a.emoji} ${esc(a.title)}${n?`<span class="n">✓${n}</span>`:''}</button>`; }).join('')}</div></div>
+    <div class="row"><button class="btn" data-mode="wizard" data-step="0">✏️ Seçimleri değiştir</button><button class="btn" data-action="reset-dept">🔄 Baştan başla</button></div>
+    `:`<div class="choices"><button class="choice main" data-mode="wizard" data-step="0"><span class="em">🧭</span><span><b>Adım adım seç</b><small>${d.steps.length} basit soru</small></span><span class="arr">→</span></button>
+      <button class="choice" data-mode="combos"><span class="em">⚡</span><span><b>Hazır paket seç</b><small>Tek dokunuş</small></span><span class="arr">→</span></button></div>`}
+    <p class="otherdepts">Başka bir şey de mi yapmak istiyorsun? Üstteki sekmelerden geçebilirsin. ☝️</p>
+  </section>`;
+}
+
+function updateHeader(){
+  const n=state.cart.length;
+  $('#cartCount').textContent=n;
+  const showBar = n>0 && !document.body.classList.contains('in-wizard') && !(state.view!=='home' && state.mode[state.view]==='done');
+  $('#cartbar').classList.toggle('show',showBar);
+  $('#cartbarInfo').textContent = `🛒 Sepetim: ${n}`;
+}
+function bump(){ const b=$('#cartCount'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
+
+/* ---------- Sepet işlemleri ---------- */
+function addItem(it){
+  if(it.a.single) state.cart=state.cart.filter(x=>!(ITEMS[x].dept===it.dept&&ITEMS[x].aisle===it.aisle));
+  if(!state.cart.includes(it.id)) state.cart.push(it.id);
+}
+let advTimer=null;
+function toggle(id){
+  const it=ITEMS[id]; if(!it) return;
+  let added=false;
+  if(state.cart.includes(id)) state.cart=state.cart.filter(x=>x!==id);
+  else{ addItem(it); bump(); added=true; }
+  save();
+  // sadece seçimleri güncelle (ekran zıplamasın)
+  document.querySelectorAll('.item[data-id]').forEach(el=>{ const s=state.cart.includes(el.dataset.id); el.classList.toggle('sel',s); el.setAttribute('aria-pressed',s); });
+  const nb=$('#nextBtn');
+  if(nb){ const d=DEPT[state.view], n=aisleCount(d.key,it.aisle); nb.textContent=nextLabel(d,state.step[d.key]||0,n); nb.classList.toggle('primary',n>0); }
+  renderTabs(); updateHeader();
+  // tek seçimlik soruda otomatik ilerle
+  clearTimeout(advTimer);
+  if(added && it.a.single && document.body.classList.contains('in-wizard')) advTimer=setTimeout(()=>wizNav(1),450);
+}
+function applyCombo(i){
+  const c=COMBOS[i]; if(!c) return;
+  state.cart=state.cart.filter(id=>ITEMS[id].dept!==c.dept);
+  c.picks.map(p=>ref(c.dept,p)).filter(Boolean).forEach(addItem);
+  save(); bump(); toast(`${c.emoji} ${c.name} sepete eklendi!`);
+  go(c.dept,'done');
+}
+function randomCart(){
+  const d=DEPT[state.view];
+  state.cart=state.cart.filter(id=>ITEMS[id].dept!==d.key);
+  const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+  d.aisles.forEach(a=>{
+    if(a.role==='neg'||a.role==='tool') return;
+    if(a.role==='type'||a.single){ if(a.role==='type'||Math.random()<.75) addItem(pick(a.items)); }
+    else{ const k=Math.random()<.35?0:(Math.random()<.6?1:2); for(let j=0;j<k;j++) addItem(pick(a.items)); }
+  });
+  save(); bump(); toast('🎲 Rastgele tarif hazır! Beğenmediğini ✕ ile çıkar.');
+  go(d.key,'done');
+}
+function resetDept(){
+  const dk=state.view; state.cart=state.cart.filter(id=>ITEMS[id].dept!==dk); state.notes[dk]=''; state.step[dk]=0;
+  save(); go(dk,'start');
+}
+
+/* ---------- Sepet çekmecesi ---------- */
+const shortTitle = a => a.role==='tool' ? 'Araç' : a.role==='neg' ? 'Negatif' : a.title.split(/ [&\/] /)[0];
+function contentsLabel(d){
+  const by={}; deptItems(d.key).forEach(i=>{ (by[i.aisle]=by[i.aisle]||[]).push(i); });
+  const li=[]; let fmtN=0;
+  d.aisles.forEach(a=>{
+    const its=by[a.key]; if(!its) return;
+    const n=its.length, x=n>1?` <small>×${n}</small>`:'';
+    switch(a.role){
+      case 'type': li.push(['Ana sahne tanımı','']); break;
+      case 'subject': li.push(['Özne tarifi',x]); break;
+      case 'place': li.push(['Mekan tarifi',x]); break;
+      case 'format': fmtN+=n; break;
+      case 'neg': li.push(['Negatif prompt',` <small>(${n} madde)</small>`]); break;
+      case 'tool': li.push([`${esc(its[0].label)} için özel biçim`,'']); break;
+      default: li.push([`${esc(shortTitle(a))} talimatları`,x]);
+    }
+  });
+  if(fmtN) li.push(['Teknik ayarlar',` <small>(${fmtN})</small>`]);
+  if((state.notes[d.key]||'').trim()) li.push(['Senin notun','']);
+  li.push(['Adım adım kullanım rehberi','']);
+  const words=buildPrompt(d.key).main.split(/\s+/).filter(Boolean).length;
+  return `<div class="label"><div class="label-h"><b>📦 Paket içeriği · ≈${Math.max(10,Math.round(words/10)*10)} kelime</b><span class="seal">🔒 Mühürlü</span></div>
+    <ul>${li.map(([t,s])=>`<li><span class="ck">✓</span><span>${t}${s}</span></li>`).join('')}</ul>
+    <div class="sealed">🔒 Prompt metni kasada açılır.</div></div>`;
+}
+function renderCart(){
+  const groups=DEPTS.filter(d=>deptItems(d.key).length), body=$('#cartBody'), foot=$('#cartFoot');
+  if(!groups.length){
+    body.innerHTML=`<div class="empty"><div style="font-size:52px">🛒</div><p>Sepetin boş.<br>Yukarıdaki sekmelerden birini seç ve başla.</p></div>`;
+    foot.innerHTML=`<button class="btn block lg" data-close>Alışverişe dön</button><button class="linkbtn" data-action="history">🧾 Eski fişlerim</button>`; return;
+  }
+  body.innerHTML = getMessages().map(x=>`<p class="note-msg ${x.t}">${esc(x.m)}</p>`).join('') +
+    groups.map(d=>{ const its=deptItems(d.key); return `<div class="cgroup"><h3>${d.emoji} ${esc(d.name)} <span class="badge">${its.length}</span></h3>
+      ${contentsLabel(d)}
+      <div class="chips">${its.map(i=>`<span class="chipx">${i.emoji} ${esc(i.label)}<button data-rm="${i.id}" aria-label="${esc(i.label)} çıkar">✕</button></span>`).join('')}</div></div>`; }).join('');
+  foot.innerHTML = `<button class="btn primary block lg" data-action="checkout">🧾 Kasaya git · ücretsiz</button>
+    <div class="row"><button class="btn" data-action="share">🔗 Sepeti paylaş</button><button class="btn" data-action="clear">🗑️ Boşalt</button></div>
+    <button class="linkbtn" data-action="history">🧾 Eski fişlerim</button>`;
+}
+
+/* ---------- Kasa ---------- */
+function checkout(){
+  if(!state.cart.length){ toast('Sepetin boş 🛒 Önce bir şey seç.'); return; }
+  if(CONFIG.youtubeUrl && !hasSub()){ openSub(); return; }
+  const order={ no:Math.random().toString(36).slice(2,8).toUpperCase(), ts:Date.now(), paid: CONFIG.youtubeUrl?'🔔 Abonelik (ücretsiz)':'Ücretsiz',
+    depts: DEPTS.filter(d=>deptItems(d.key).length).map(d=>({key:d.key, name:d.name, emoji:d.emoji, items:deptItems(d.key).map(i=>i.label), prompt:buildPrompt(d.key)})) };
+  const h=LS.get('pm_hist',[]); h.unshift(order); LS.set('pm_hist',h.slice(0,30));
+  sendEvent({type:'prompt', depts: DEPTS.filter(d=>deptItems(d.key).length).map(d=>d.key)});
+  if($('#cartDlg').open) $('#cartDlg').close();
+  showReceipt(order);
+}
+let COPY=[], CUR=null;
+/* ---------- Dosya olarak indir ---------- */
+const slug = s => String(s).toLocaleLowerCase('tr').replace(/[ğüşıöç]/g,c=>({'ğ':'g','ü':'u','ş':'s','ı':'i','ö':'o','ç':'c'}[c])).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function receiptText(o, idx){
+  const ds = idx==null ? o.depts : [o.depts[idx]];
+  const date=new Date(o.ts).toLocaleString('tr-TR',{dateStyle:'long',timeStyle:'short'});
+  const L=['🪐 PROMPTORYUM · Hayal et, seç, oluştur', `Fiş #${o.no} · ${date}`, ''];
+  ds.forEach(d=>{
+    const p=d.prompt, steps=TOOL_HOWTO[p.tool]||TOOL_HOWTO.general;
+    L.push(`==================== ${d.emoji} ${d.name.toLocaleUpperCase('tr')} PROMPTU (${p.toolName}) ====================`, '');
+    L.push(p.main, '');
+    if(p.neg) L.push('--- 🚫 Olmasın listesi (negatif prompt) ---', p.neg, '');
+    L.push('💡 Nasıl kullanılır?'); steps.forEach((s,i)=>L.push(`  ${i+1}) ${s}`)); L.push('');
+    L.push('🛒 Seçtiklerin: '+d.items.join(', '), '');
+  });
+  if(CONFIG.youtubeUrl){ let u=CONFIG.youtubeUrl; try{ u=decodeURI(u); }catch(e){} L.push(`🎬 Bu promptlarla neler yapılabildiğini izle: ${CONFIG.youtubeName} → ${u}`); }
+  return L.join('\r\n');
+}
+function downloadReceipt(idx){
+  if(!CUR) return;
+  const part = idx==null ? (CUR.depts.length>1?'hepsi':slug(CUR.depts[0].name)) : slug(CUR.depts[idx].name);
+  const name=`promptoryum-${part}-${CUR.no.toLowerCase()}.txt`;
+  const blob=new Blob(['﻿'+receiptText(CUR,idx)],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  toast(`📥 ${name} indirildi`);
+}
+function showReceipt(o){
+  COPY=[]; CUR=o; const add=t=>{COPY.push(t); return COPY.length-1;};
+  const total=o.depts.reduce((s,d)=>s+d.items.length,0);
+  const date=new Date(o.ts).toLocaleString('tr-TR',{dateStyle:'short',timeStyle:'short'});
+  let h='';
+  o.depts.forEach((d,di)=>{
+    const p=d.prompt, steps=TOOL_HOWTO[p.tool]||TOOL_HOWTO.general;
+    h+=`<div class="out"><h3>${d.emoji} ${esc(d.name)} promptun <span class="tool">${esc(p.toolName)}</span></h3>
+      <div class="pbox">${esc(p.main)}</div>
+      <button class="btn primary block lg copy" data-copy="${add(p.main)}">📋 Promptu kopyala</button>
+      <button class="btn block" style="margin-top:8px" data-dl="${di}">📥 Dosya olarak indir</button>`;
+    if(p.neg) h+=`<h4>🚫 Olmasın listesi (negatif prompt)</h4><div class="pbox neg">${esc(p.neg)}</div><button class="btn block copy" data-copy="${add(p.neg)}">📋 Olmasın listesini kopyala</button>`;
+    h+=`<div class="howuse"><b>💡 Nasıl kullanılır?</b><ol>${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div></div>`;
+  });
+  if(o.depts.length>1){
+    const all=o.depts.map(d=>`### ${d.name}\n${d.prompt.main}${d.prompt.neg?`\nNegative: ${d.prompt.neg}`:''}`).join('\n\n');
+    h+=`<div class="row" style="margin-top:16px"><button class="btn" data-copy="${add(all)}">📋 Hepsini kopyala</button><button class="btn" data-dl="all">📥 Hepsini tek dosyada indir</button></div>`;
+  }
+  if(CONFIG.youtubeUrl) h+=`<div class="ytcta"><p>🎬 Bu promptlarla neler yapılabildiğini kanalda izle!</p>
+    <a class="btn yt block" href="${esc(CONFIG.youtubeUrl)}" target="_blank" rel="noopener">▶ ${esc(CONFIG.youtubeName)} kanalına git</a>
+    <button class="btn block" style="margin-top:8px" data-action="share-site">📤 Siteyi arkadaşına gönder</button></div>`;
+  h+=`<details style="margin-top:18px"><summary style="cursor:pointer;color:var(--muted)">🧾 Fişi göster</summary><div class="receipt" style="margin-top:10px">
+    <div class="r-center"><b>🪐 PROMPTORYUM</b><br>Hayal et, seç, oluştur<br>Fiş #${esc(o.no)} · ${esc(date)}</div><div class="r-sep"></div>`;
+  o.depts.forEach(d=>{ h+=`<div class="r-dept">${d.emoji} ${esc(d.name)}</div>` + d.items.map(l=>`<div class="r-line"><span>1x ${esc(l)}</span><span class="d"></span><span>✓</span></div>`).join(''); });
+  h+=`<div class="r-sep"></div><div class="r-line total"><span>TOPLAM</span><span class="d"></span><span>${total} ürün</span></div>
+    <div class="r-line"><span>ÖDEME</span><span class="d"></span><span>${esc(o.paid)}</span></div></div></details>`;
+  h+=`<p class="thanks">Teşekkürler, yine bekleriz! 🛍️</p>`;
+  $('#coBody').innerHTML=h; $('#checkoutDlg').showModal(); $('#coBody').scrollTop=0;
+}
+
+/* ---------- YouTube abonelik adımı ---------- */
+let subMem=false, subTimer=null;
+const hasSub = ()=> subMem || LS.get('pm_sub',false)===true;
+function subLink(){ const u=CONFIG.youtubeUrl; return u + (u.includes('?')?'&':'?') + 'sub_confirmation=1'; }
+function openSub(){
+  $('#subBody').innerHTML = `
+    <div class="subcard"><img class="avatar" src="avatar.webp" alt="" width="48" height="48"><div><b>${esc(CONFIG.youtubeName)}</b><small>YouTube kanalı</small></div></div>
+    <p style="margin:0;font-size:16px">Promptunu almak için kanalıma abone ol. Ücretsiz! 🚀</p>
+    <ol class="substeps">
+      <li>Kırmızı düğmeye bas</li>
+      <li>Açılan YouTube sayfasında <b>Abone ol</b>'a tıkla</li>
+      <li>Buraya dön ve <b>Abone oldum</b>'a bas</li>
+    </ol>
+    <div class="subbtns">
+      <a class="btn yt block lg" href="${esc(subLink())}" target="_blank" rel="noopener" data-action="sub-open">🔔 1. YouTube'da abone ol</a>
+      <button class="btn primary block lg" id="subDone" data-action="sub-done" disabled>✅ 2. Abone oldum, promptumu ver</button>
+    </div>
+    ${LIVE.on && LIVE.d && LIVE.d.subsToday>0 ? `<p class="socialproof">🔥 Bugün ${LIVE.d.subsToday} kişi abone oldu</p>`:''}`;
+  if($('#cartDlg').open) $('#cartDlg').close();
+  $('#subDlg').showModal();
+  if(LS.get('pm_sub_clicked',false)) subOpened();
+}
+function subOpened(){
+  const b=$('#subDone'); if(!b || !b.disabled) return;
+  let n=5; b.textContent=`⏳ Abone olman bekleniyor… ${n}`;
+  clearInterval(subTimer);
+  subTimer=setInterval(()=>{ n--; if(n>0){ b.textContent=`⏳ Abone olman bekleniyor… ${n}`; } else { clearInterval(subTimer); b.disabled=false; b.textContent='✅ 2. Abone oldum, promptumu ver'; } },1000);
+}
+function subDone(){
+  subMem=true; LS.set('pm_sub',true);
+  sendEvent({type:'sub'});
+  $('#subDlg').close(); toast('🔔 Teşekkürler, aramıza hoş geldin!');
+  checkout();
+}
+
+/* ---------- Geçmiş ---------- */
+function openHistory(){
+  const h=LS.get('pm_hist',[]);
+  $('#histBody').innerHTML = h.length ? `<ul class="hist">${h.map((o,i)=>`<li><button data-hist="${i}"><b>Fiş #${esc(o.no)}</b> · ${o.depts.map(d=>d.emoji+' '+esc(d.name)).join(', ')}<br><small>${new Date(o.ts).toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'})} · ${o.depts.reduce((s,d)=>s+d.items.length,0)} ürün</small></button></li>`).join('')}</ul>`
+    : `<div class="empty"><div style="font-size:44px">🧾</div>Henüz fişin yok.</div>`;
+  if($('#cartDlg').open) $('#cartDlg').close();
+  $('#histDlg').showModal();
+}
+
+/* ---------- Yardımcılar ---------- */
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(_){} ta.remove(); }
+}
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2600); }
+function share(){
+  const url=location.href.split('#')[0].split('?')[0]+'#sepet='+encodeURIComponent(state.cart.join(','));
+  copyText(url).then(()=>toast('🔗 Sepet linki kopyalandı. Arkadaşın açınca aynı sepeti görür.'));
+}
+function shareSite(){
+  const url=location.href.split('#')[0].split('?')[0];
+  const text='Promptoryum: Yapay zekâ promptlarını ücretsiz, adım adım hazırla! ';
+  if(navigator.share){ navigator.share({title:'Promptoryum',text,url}).catch(()=>{}); }
+  else copyText(text+url).then(()=>toast('📤 Site linki kopyalandı, arkadaşına gönder!'));
+}
+
+/* ---------- Olaylar ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-id],[data-combo],[data-view],[data-mode],[data-nav],[data-extra],[data-rm],[data-close],[data-copy],[data-dl],[data-hist],[data-action]');
+  if(!t) return;
+  if(t.dataset.dl!=null){ downloadReceipt(t.dataset.dl==='all'?null:+t.dataset.dl); return; }
+  if(t.dataset.id){ toggle(t.dataset.id); return; }
+  if(t.dataset.combo!=null){ applyCombo(+t.dataset.combo); return; }
+  if(t.dataset.view){ const v=t.dataset.view; if(v==='home') go('home'); else go(v, state.mode[v]||'start'); return; }
+  if(t.dataset.mode){ go(state.view, t.dataset.mode, t.dataset.step!=null?+t.dataset.step:null); return; }
+  if(t.dataset.nav){ clearTimeout(advTimer); wizNav(t.dataset.nav==='next'?1:-1); return; }
+  if(t.dataset.extra){ go(state.view,'wizard',null,t.dataset.extra); return; }
+  if(t.dataset.rm){ state.cart=state.cart.filter(x=>x!==t.dataset.rm); save(); if($('#cartDlg').open) renderCart(); render(); return; }
+  if(t.hasAttribute('data-close')){ t.closest('dialog').close(); return; }
+  if(t.dataset.copy!=null){ copyText(COPY[+t.dataset.copy]).then(()=>{ const o=t.textContent; t.classList.add('done'); t.textContent='✓ Kopyalandı! Şimdi yapıştır'; setTimeout(()=>{t.classList.remove('done'); t.textContent=o;},1800); }); return; }
+  if(t.dataset.hist!=null){ const o=LS.get('pm_hist',[])[+t.dataset.hist]; $('#histDlg').close(); if(o) showReceipt(o); return; }
+  switch(t.dataset.action){
+    case 'open-cart': renderCart(); $('#cartDlg').showModal(); break;
+    case 'checkout': checkout(); break;
+    case 'share': share(); break;
+    case 'share-site': shareSite(); break;
+    case 'clear': if(confirm('Sepeti boşaltmak istediğine emin misin?')){ state.cart=[]; save(); renderCart(); render(); } break;
+    case 'random': randomCart(); break;
+    case 'reset-dept': resetDept(); break;
+    case 'history': openHistory(); break;
+    case 'sub-open': subOpened(); break;
+    case 'sub-done': subDone(); break;
+    case 'sub-header': LS.set('pm_sub_clicked',true); break;
+  }
+});
+document.addEventListener('input',e=>{ if(e.target.id==='note'){ state.notes[state.view]=e.target.value; save(); } });
+document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{ if(e.target===d) d.close(); }));
+
+/* ---------- Yıldızlı gökyüzü ---------- */
+(function stars(){
+  const cv=$('#stars'), ctx=cv.getContext('2d'); if(!ctx) return;
+  const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H,S=[],shoot=null; const dpr=Math.min(2,window.devicePixelRatio||1);
+  function size(){ W=innerWidth; H=innerHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    const n=Math.round(W*H/2600); S=[]; for(let i=0;i<n;i++) S.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+.2,a:Math.random()*6,s:Math.random()*.02+.004,h:Math.random()<.15?(Math.random()<.5?'200,220,255':'220,200,255'):'255,255,255'}); }
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    S.forEach(s=>{ if(!still) s.a+=s.s; const o=.35+.65*Math.abs(Math.sin(s.a)); ctx.fillStyle=`rgba(${s.h},${o})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,6.283); ctx.fill(); });
+    if(!still){
+      if(!shoot && Math.random()<.004) shoot={x:Math.random()*W*.8,y:Math.random()*H*.4,l:0};
+      if(shoot){ shoot.l+=14; const x=shoot.x+shoot.l, y=shoot.y+shoot.l*.45; const g=ctx.createLinearGradient(x-90,y-40,x,y); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(1,'rgba(255,255,255,.9)'); ctx.strokeStyle=g; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(x-90,y-40); ctx.lineTo(x,y); ctx.stroke(); if(shoot.l>W*.5) shoot=null; }
+      requestAnimationFrame(frame);
+    }
+  }
+  size(); addEventListener('resize',()=>{ size(); if(still) frame(); }); frame();
+})();
+
+/* ---------- Başlat ---------- */
+(function loadShared(){
+  const m=location.hash.match(/sepet=([^&]+)/); if(!m) return;
+  const ids=decodeURIComponent(m[1]).split(',').filter(id=>ITEMS[id]);
+  if(ids.length){ state.cart=ids; state.view=ITEMS[ids[0]].dept; state.mode[state.view]='done'; save(); setTimeout(()=>toast('🛒 Paylaşılan sepet yüklendi'),300); }
+  history.replaceState(null,'',location.pathname+location.search);
+})();
+(function setupYT(){
+  const ok=!!CONFIG.youtubeUrl;
+  ['#ytBtn','#ytBtn2'].forEach(s=>{ const a=$(s); if(ok) a.href=subLink(); else a.style.display='none'; });
+  if(!ok) document.querySelector('.ytfoot').style.display='none';
+  $('#ytName2').textContent=CONFIG.youtubeName;
+})();
+if(state.mode[state.view]==='wizard') state.extra=null;
+render();
+startLive();
+try{ history.replaceState(snap(),''); }catch(e){}
+window.PM={buildPrompt, state};
+</script>
+</body>
+</html>

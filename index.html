@@ -32,15 +32,47 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html{scroll-behavior:smooth;background:var(--bg)}
-#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
-body{margin:0;color:var(--text);min-height:100vh;font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
+html{scroll-behavior:smooth;min-height:100%;
   background:
     radial-gradient(ellipse 60% 45% at 10% 5%, color-mix(in srgb,var(--c1) 30%,transparent), transparent 70%),
     radial-gradient(ellipse 50% 40% at 92% 30%, color-mix(in srgb,var(--c2) 20%,transparent), transparent 70%),
     radial-gradient(ellipse 70% 50% at 55% 105%, rgba(236,72,153,.14), transparent 70%),
     var(--bg);
-  background-attachment:fixed;transition:background .4s}
+  background-attachment:fixed}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+
+/* ===== Hareketli uzay arka planı ===== */
+#nebula{position:fixed;inset:-15%;z-index:-2;pointer-events:none;opacity:.35;transition:opacity 1.2s}
+body.is-home #nebula{opacity:1}
+#nebula i{position:absolute;border-radius:50%;filter:blur(70px);will-change:transform}
+#nebula .n1{width:60vmax;height:60vmax;left:-5%;top:-10%;background:radial-gradient(circle,color-mix(in srgb,var(--c1) 45%,transparent),transparent 65%);animation:drift1 34s ease-in-out infinite alternate}
+#nebula .n2{width:55vmax;height:55vmax;right:-10%;top:20%;background:radial-gradient(circle,color-mix(in srgb,var(--c2) 35%,transparent),transparent 65%);animation:drift2 41s ease-in-out infinite alternate}
+#nebula .n3{width:50vmax;height:50vmax;left:25%;bottom:-20%;background:radial-gradient(circle,rgba(225,29,72,.28),transparent 65%);animation:drift3 47s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(16vw,10vh) scale(1.2) rotate(25deg)}}
+@keyframes drift2{to{transform:translate(-14vw,-8vh) scale(1.3) rotate(-20deg)}}
+@keyframes drift3{to{transform:translate(-10vw,-14vh) scale(1.15)}}
+
+#planet{position:fixed;right:-70px;bottom:7vh;width:280px;height:280px;z-index:-1;pointer-events:none;opacity:0;transform:translateY(30px);transition:opacity 1.2s,transform 1.2s}
+body.is-home #planet{opacity:.95;transform:none}
+#planet .ball{position:absolute;inset:22%;border-radius:50%;animation:bob 12s ease-in-out infinite;
+  background:radial-gradient(circle at 32% 28%,#ffd0d8 0,#fb7185 12%,#e11d48 38%,#7f1d1d 68%,#2a0509 100%);
+  box-shadow:inset -22px -26px 44px rgba(0,0,0,.65),0 0 70px rgba(225,29,72,.45)}
+#planet .ball::after{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-linear-gradient(-18deg,transparent 0 14px,rgba(255,255,255,.06) 14px 20px);mix-blend-mode:overlay}
+#planet .ring{position:absolute;left:2%;right:2%;top:43%;height:16%;border-radius:50%;border:3px solid rgba(255,170,190,.55);transform:rotate(-18deg);animation:bob 12s ease-in-out infinite}
+#planet .ring.back{clip-path:inset(0 0 50% 0);opacity:.6}
+#planet .ring.front{clip-path:inset(50% 0 0 0);box-shadow:0 6px 14px -6px rgba(255,120,150,.5)}
+#planet .orbit{position:absolute;inset:-6%;border-radius:50%;animation:spin 22s linear infinite}
+#planet .moon{position:absolute;top:8%;left:50%;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e0f2fe,#7dd3fc 40%,#1e3a8a 100%);box-shadow:0 0 14px rgba(125,211,252,.6)}
+@keyframes bob{50%{translate:0 -14px}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:640px){
+  #planet{width:170px;height:170px;right:-55px;bottom:3vh}
+  body.is-home #planet{opacity:.55}
+  #planet .moon{width:14px;height:14px}
+}
+@media (prefers-reduced-motion:reduce){#nebula i,#planet *{animation:none!important}}
+/* Arka plan html'de; body şeffaf ki yıldızlar, nebula ve gezegen görünsün */
+body{margin:0;color:var(--text);min-height:100vh;font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;background:transparent}
 button{font:inherit;color:inherit}
 a{color:var(--at)}
 :focus-visible{outline:3px solid var(--at);outline-offset:2px}
@@ -296,7 +328,12 @@ body.in-wizard footer{display:none}
 </style>
 </head>
 <body>
+<div id="nebula" aria-hidden="true"><i class="n1"></i><i class="n2"></i><i class="n3"></i></div>
 <canvas id="stars" aria-hidden="true"></canvas>
+<div id="planet" aria-hidden="true">
+  <div class="orbit"><span class="moon"></span></div>
+  <div class="ring back"></div><div class="ball"></div><div class="ring front"></div>
+</div>
 
 <header class="top">
   <div class="wrap">
@@ -1050,6 +1087,8 @@ addEventListener('popstate',e=>{ const s=e.state; if(!s){ go('home',null,null,nu
 function render(){
   const v=state.view;
   applyTheme(v);
+  document.body.classList.toggle('is-home', v==='home');
+  BG.speed = v==='home' ? 0.0018 : 0;
   renderTabs();
   const m=$('#main');
   let inWiz=false;
@@ -1528,18 +1567,30 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{ if(e.target.id==='note'){ state.notes[state.view]=e.target.value; save(); } });
 document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{ if(e.target===d) d.close(); }));
 
-/* ---------- Yıldızlı gökyüzü ---------- */
+/* ---------- Yıldızlı gökyüzü (giriş sayfasında uzayda süzülme efekti) ---------- */
+const BG = { speed: 0 };   // render() giriş sayfasında artırır, diğer sayfalarda 0 yapar
 (function stars(){
   const cv=$('#stars'), ctx=cv.getContext('2d'); if(!ctx) return;
   const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let W,H,S=[],shoot=null; const dpr=Math.min(2,window.devicePixelRatio||1);
+  let W,H,S=[],shoot=null,sp=0; const dpr=Math.min(2,window.devicePixelRatio||1);
+  const col=()=>Math.random()<.15?(Math.random()<.5?'200,220,255':'255,200,215'):'255,255,255';
+  const mk=fresh=>{ const r0=Math.random()*1.3+.2; return {x:Math.random()*W,y:Math.random()*H,r0,r:r0,a:Math.random()*6,s:Math.random()*.02+.004,h:col(),f:fresh?0:1}; };
   function size(){ W=innerWidth; H=innerHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
-    const n=Math.round(W*H/2600); S=[]; for(let i=0;i<n;i++) S.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+.2,a:Math.random()*6,s:Math.random()*.02+.004,h:Math.random()<.15?(Math.random()<.5?'200,220,255':'220,200,255'):'255,255,255'}); }
+    const n=Math.min(800,Math.round(W*H/2400)); S=[]; for(let i=0;i<n;i++) S.push(mk(false)); }
   function frame(){
     ctx.clearRect(0,0,W,H);
-    S.forEach(s=>{ if(!still) s.a+=s.s; const o=.35+.65*Math.abs(Math.sin(s.a)); ctx.fillStyle=`rgba(${s.h},${o})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,6.283); ctx.fill(); });
+    sp += ((still?0:BG.speed)-sp)*0.04;                 // hız yumuşakça değişir
+    const cx=W/2, cy=H*0.42;
+    for(const s of S){
+      if(!still) s.a+=s.s;
+      if(sp>0.00005){ s.x+=(s.x-cx)*sp; s.y+=(s.y-cy)*sp; s.r=Math.min(s.r0*2.6, s.r*(1+sp*0.9)); }  // merkezden dışa akış
+      if(s.f<1) s.f=Math.min(1,s.f+0.02);               // yeni doğan yıldız yavaşça belirir
+      if(s.x<-10||s.x>W+10||s.y<-10||s.y>H+10) Object.assign(s,mk(true));
+      const o=(.35+.65*Math.abs(Math.sin(s.a)))*s.f;
+      ctx.fillStyle=`rgba(${s.h},${o})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,6.283); ctx.fill();
+    }
     if(!still){
-      if(!shoot && Math.random()<.004) shoot={x:Math.random()*W*.8,y:Math.random()*H*.4,l:0};
+      if(!shoot && Math.random()<(BG.speed>0?.009:.003)) shoot={x:Math.random()*W*.8,y:Math.random()*H*.4,l:0};
       if(shoot){ shoot.l+=14; const x=shoot.x+shoot.l, y=shoot.y+shoot.l*.45; const g=ctx.createLinearGradient(x-90,y-40,x,y); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(1,'rgba(255,255,255,.9)'); ctx.strokeStyle=g; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(x-90,y-40); ctx.lineTo(x,y); ctx.stroke(); if(shoot.l>W*.5) shoot=null; }
       requestAnimationFrame(frame);
     }
